@@ -26,11 +26,10 @@ int main(int argc, char *argv[]) {
 	sleep(1);
 
 
-	// TODO: spawn mappers processes and run 'mapper' executable using exec
+	//TODO: spawn mappers processes and run 'mapper' executable using exec
 	
 	
-	// To do
-	// wait for all children to complete execution
+	// TODO: wait for all children to complete execution
     
 
 	// ###### DO NOT REMOVE ######
@@ -44,11 +43,9 @@ int main(int argc, char *argv[]) {
 	sleep(1);
 
 
-	// To do
-	// spawn reducer processes and run 'reducer' executable using exec
+	// TODO: spawn reducer processes and run 'reducer' executable using exec
 
-	// To do
-	// wait for all children to complete execution
+	//TODO: wait for all children to complete execution
 
 	return 0;
 }
