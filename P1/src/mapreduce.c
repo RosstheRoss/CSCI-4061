@@ -26,8 +26,8 @@ int main(int argc, char *argv[]) {
 	sleep(1);
 
 
-	// To do
-	// spawn mappers processes and run 'mapper' executable using exec
+	// TODO: spawn mappers processes and run 'mapper' executable using exec
+	
 	
 	// To do
 	// wait for all children to complete execution
