@@ -5,7 +5,7 @@ SRCDIR=src
 INCLDIR=include
 LIBDIR=lib
 
-mapreduce: $(LIBDIR)/utils.o mapper reducer
+mapreduce: $(LIBDIR)/utils.o $(SRCDIR)/mapreduce.c mapper reducer
 	$(CC) $(CFLAGS) -I$(INCLDIR) $(LIBDIR)/utils.o $(SRCDIR)/mapreduce.c -o mapreduce
 
 mapper: $(SRCDIR)/mapper.c $(LIBDIR)/utils.o
