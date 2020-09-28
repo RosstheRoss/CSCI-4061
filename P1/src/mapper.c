@@ -23,11 +23,11 @@ valueList *insertNewValueToList(valueList *root, char *count){
 void freeValueList(valueList *root) {
 	if(root == NULL) return;
 
-	valueList *tempNode = root -> next;;
-	while (tempNode != NULL){
-		free(root);
-		root = tempNode;
-		tempNode = tempNode -> next;
+	valueList *tempNode = NULL;
+	while (root != NULL){
+		tempNode = root;
+		root = root -> next;
+		free(tempNode);
 	}
 }
 
@@ -64,14 +64,14 @@ intermediateDS *insertPairToInterDS(intermediateDS *root, char *word, char *coun
 
 // free the DS after usage. Call this once you are done with the writing of DS into file
 void freeInterDS(intermediateDS *root) {
-	if(root == NULL) return;
+if(root == NULL) return;
 
-	intermediateDS *tempNode = root -> next;;
-	while (tempNode != NULL){
-		freeValueList(root -> value);
-		free(root);
-		root = tempNode;
-		tempNode = tempNode -> next;
+intermediateDS *tempNode = NULL;
+while (root != NULL) {
+	tempNode = root;
+	root = root -> next;
+	freeValueList(tempNode -> value);
+	free(tempNode);
 	}
 }
 

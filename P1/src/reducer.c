@@ -33,11 +33,11 @@ finalKeyValueDS *insertNewKeyValue(finalKeyValueDS *root, char *word, int count)
 void freeFinalDS(finalKeyValueDS *root) {
 	if(root == NULL) return;
 
-	finalKeyValueDS *tempNode = root -> next;;
-	while (tempNode != NULL){
-		free(root);
-		root = tempNode;
-		tempNode = tempNode -> next;
+	finalKeyValueDS *tempNode = NULL;
+	while (root != NULL) {
+		tempNode = root;
+		root = root -> next;
+		free(tempNode);
 	}
 }
 
