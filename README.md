@@ -1,6 +1,2 @@
 # csci4061Projects
-Name says everything here. I'm not that creative.
-
-# I'd probably recommend making branches so we don't clobber each other's code
-
-# SSH TEST
+CSCI 4061: Intro to Operating Systems project repository by Andrea Smith and Matt Strapp at the University of Minnesota Fall 2020. 
