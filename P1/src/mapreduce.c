@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
 		mapperPid = fork();
 		if (mapperPid > 0) {
 			//TODO: exec here
-		
+			execl("./mapper", "./mapper", i, NULL);
 		}
 	}
 	
@@ -58,6 +58,7 @@ int main(int argc, char *argv[]) {
 		reducerPid = fork();
 		if (reducerPid > 0) {
 			//TODO: exec here	
+			execl("./reducer", "./reducer", i, NULL);
 		}
 	}
 
