@@ -81,6 +81,7 @@ void emit(char *key, char *value) {
 	//Go through intermediateDS, comparing key in list to *key.
 	//If it exists, somehow add to the value list another "1" to the existing list.
 	//If it never does (use string compare thing), add it to the end along with the "1".
+	
 	/* THIS IS NOT CURRENTLY IMPLEMENTED PROPERLY BUT SHOULD BE ABOUT RIGHT
 	CONCEPTUALLY.
 	intermediateDS *tempNode = NULL;
