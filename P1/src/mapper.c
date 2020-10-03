@@ -76,8 +76,14 @@ while (root != NULL) {
 }
 
 // emit the <key, value> into intermediate DS 
+// eats the data into the DS
 void emit(char *key, char *value) {
-
+	// Traverse the value list
+	intermediateDS *tempNode = NULL;
+	while (root != NULL) {
+		tempNode = root;
+		root = root -> next;
+		}
 }
 
 // map function
@@ -89,6 +95,7 @@ void map(char *chunkData){
 
 // write intermediate data to separate word.txt files
 // Each file will have only one line : word 1 1 1 1 1 ...
+// poops the data out into separate .txt files 
 void writeIntermediateDS() {
 	
 }
