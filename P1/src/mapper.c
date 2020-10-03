@@ -78,12 +78,17 @@ while (root != NULL) {
 // emit the <key, value> into intermediate DS 
 // eats the data into the DS
 void emit(char *key, char *value) {
-	// Traverse the value list
+	//Go through intermediateDS, comparing key in list to *key.
+	//If it exists, somehow add to the value list another "1" to the existing list.
+	//If it never does (use string compare thing), add it to the end along with the "1".
+	/* THIS IS NOT CURRENTLY IMPLEMENTED PROPERLY BUT SHOULD BE ABOUT RIGHT
+	CONCEPTUALLY.
 	intermediateDS *tempNode = NULL;
 	while (root != NULL) {
 		tempNode = root;
 		root = root -> next;
 		}
+		*/
 }
 
 // map function
