@@ -29,8 +29,9 @@ int main(int argc, char *argv[]) {
 	pid_t mapperPid;
 	for (int i = 0; i < nMappers; i++) {
 		mapperPid = fork();
-		if (mapperPid != 0) {
-			//TODO: exec here	
+		if (mapperPid > 0) {
+			//TODO: exec here
+		
 		}
 	}
 	
@@ -55,7 +56,7 @@ int main(int argc, char *argv[]) {
 	pid_t reducerPid;
 	for (int i = 0; i < nReducers; i++) {
 		reducerPid = fork();
-		if (reducerPid != 0) {
+		if (reducerPid > 0) {
 			//TODO: exec here	
 		}
 	}
