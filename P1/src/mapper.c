@@ -100,6 +100,7 @@ int main(int argc, char *argv[]) {
 		printf("./mapper mapperID\n");
 		exit(0);
 	}
+
 	// ###### DO NOT REMOVE ######
 	mapperID = strtol(argv[1], NULL, 10);
 
