@@ -105,7 +105,7 @@ void writeIntermediateDS() {
 	while(tempNode != NULL) {
 		// Get string of 1's associated with the word
 		char ones[100];
-		tempNode2 = tempNode2 -> value; 
+		// tempNode2 = tempNode2 -> value; 
 		while(tempNode2 != NULL) {
 			printf("This loop is being run\n");
 			strcat(ones, "1 ");
