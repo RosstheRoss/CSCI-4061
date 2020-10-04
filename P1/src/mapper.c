@@ -115,8 +115,9 @@ void writeIntermediateDS() {
 		char filename[100];
 		sprintf(filename, "output/MapOut/Map_%d/%s.txt", mapperID, tempNode -> key);
 		FILE* fptr = fopen(filename, "w");
-		tempNode = tempNode -> next;
+		fprintf(fptr, "%s %s", tempNode -> key, ones);
 		fclose(fptr);
+		tempNode = tempNode -> next;
 	}
 	// freeInterDS(&DS);
 }
