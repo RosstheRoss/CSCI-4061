@@ -100,15 +100,16 @@ void map(char *chunkData){
 // poops the data out into separate .txt files named after the word
 void writeIntermediateDS() {
 	intermediateDS *tempNode = &DS;
-	valueList *tempNode2;
+	valueList *tempNode2 = tempNode -> value;
 
 	while(tempNode != NULL) {
 		// Get string of 1's associated with the word
 		char ones[100];
 		tempNode2 = tempNode2 -> value; 
 		while(tempNode2 != NULL) {
+			printf("This loop is being run\n");
 			strcat(ones, "1 ");
-			tempNode2 = tempNode -> next;
+			tempNode2 = tempNode2 -> next;
 		}
 
 		// Shove word and ones in a file named word.txt
