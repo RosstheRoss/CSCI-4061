@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
 		}
 	}
 	
-    for (int i = 0; i < nMappers; i++) {
+    for (int i = 0; i <= nMappers; i++) {
 		//Hopefully this works
 		wait(NULL);
 	}
@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	for (int i = 0; i < nReducers; i++) {
+	for (int i = 0; i <= nReducers; i++) {
 		//Maybe this works too?
 		wait(NULL);
 	}
