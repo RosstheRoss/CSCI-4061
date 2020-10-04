@@ -1,5 +1,7 @@
 #include "mapper.h"
 
+intermediateDS DS;
+
 // combined value list corresponding to a word <1,1,1,1....>
 valueList *createNewValueListNode(char *value){
 	valueList *newNode = (valueList *)malloc (sizeof(valueList));
@@ -78,7 +80,7 @@ while (root != NULL) {
 // emit the <key, value> into intermediate DS 
 // eats the data into the DS
 void emit(char *key, char *value) {
-
+	insertPairToInterDS(&DS, key, value);
 }
 
 // map function
@@ -95,9 +97,30 @@ void map(char *chunkData){
 
 // write intermediate data to separate word.txt files
 // Each file will have only one line : word 1 1 1 1 1 ...
-// poops the data out into separate .txt files 
+// poops the data out into separate .txt files named after the word
 void writeIntermediateDS() {
+	// Iterate through intermediate DS
+	// Create new word.txt
+	// Insert <word, value list> 
+
+	intermediateDS *tempNode = DS;
+	intermediateDS *tempNode2 = DS;
+
+	// Traverse valueList
+	tempNode2 = tempNode2 -> value;	
+	while(tempNode2 != NULL) {
+		
+		tempNode2 = tempNode -> next;
+	}
 	
+	
+	// while(tempNode != NULL) {
+	// 	char filename[20];
+	// 	sprintf(filename, "%s.txt", foo);
+	// 	FILE* fptr = fopen("%s.txt",  "w");
+
+	// 	tempNode = tempNode -> next;
+	// }
 }
 
 int main(int argc, char *argv[]) {
