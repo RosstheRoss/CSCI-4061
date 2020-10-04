@@ -99,28 +99,24 @@ void map(char *chunkData){
 // Each file will have only one line : word 1 1 1 1 1 ...
 // poops the data out into separate .txt files named after the word
 void writeIntermediateDS() {
-	// Iterate through intermediate DS
-	// Create new word.txt
-	// Insert <word, value list> 
+	intermediateDS *tempNode = &DS;
+	valueList *tempNode2;
 
-	intermediateDS *tempNode = DS;
-	intermediateDS *tempNode2 = DS;
+	while(tempNode != NULL) {
+		// Get string of 1's associated with the word
+		char ones[100];
+		tempNode2 = tempNode2 -> value; 
+		while(tempNode2 != NULL) {
+			strcat(ones, "1 ");
+			tempNode2 = tempNode -> next;
+		}
 
-	// Traverse valueList
-	tempNode2 = tempNode2 -> value;	
-	while(tempNode2 != NULL) {
-		
-		tempNode2 = tempNode -> next;
+		// Shove word and ones in a file named word.txt
+		char filename[20];
+		sprintf(filename, "output/map_%d/%s.txt", mapperID, tempNode -> key);
+		FILE* fptr = fopen(filename, "w");
+		tempNode = tempNode -> next;
 	}
-	
-	
-	// while(tempNode != NULL) {
-	// 	char filename[20];
-	// 	sprintf(filename, "%s.txt", foo);
-	// 	FILE* fptr = fopen("%s.txt",  "w");
-
-	// 	tempNode = tempNode -> next;
-	// }
 }
 
 int main(int argc, char *argv[]) {
