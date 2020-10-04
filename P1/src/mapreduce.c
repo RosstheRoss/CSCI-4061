@@ -55,10 +55,13 @@ int main(int argc, char *argv[]) {
 
 	pid_t reducerPid;
 	for (int i = 0; i < nReducers; i++) {
+		if (pid == 0)
 		reducerPid = fork();
 		if (reducerPid > 0) {
-			//TODO: exec here	
-			execl("./reducer", "./reducer", i, NULL);
+			//TODO: exec here
+			char* num[10];
+			sprintf(&num, "%d", i);
+			execl("./reducer", "./reducer", &num, NULL);
 		}
 	}
 
