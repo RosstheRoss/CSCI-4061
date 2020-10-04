@@ -87,6 +87,7 @@ void map(char *chunkData){
 	char *buffer;
 	while ((buffer = getWord(chunkData, &i)) != NULL){
 		// get words from buffer & give it to emitter to be put into intermediateDS
+		emit(buffer, "1");
 	}
 	// you can use getWord to retrieve words from the 
 	// chunkData one by one. Example usage in utils.h
