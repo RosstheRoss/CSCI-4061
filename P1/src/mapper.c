@@ -112,12 +112,13 @@ void writeIntermediateDS() {
 		}
 
 		// Shove word and ones in a file named word.txt
-		char filename[20];
-		sprintf(filename, "output/map_%d/%s.txt", mapperID, tempNode -> key);
+		char filename[100];
+		sprintf(filename, "output/MapOut/Map_%d/%s.txt", mapperID, tempNode -> key);
 		FILE* fptr = fopen(filename, "w");
 		tempNode = tempNode -> next;
 		fclose(fptr);
 	}
+	// freeInterDS(&DS);
 }
 
 int main(int argc, char *argv[]) {
