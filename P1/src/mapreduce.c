@@ -31,7 +31,9 @@ int main(int argc, char *argv[]) {
 		mapperPid = fork();
 		if (mapperPid > 0) {
 			//TODO: exec here
-			execl("./mapper", "./mapper", i, NULL);
+			char num[10];
+			sprintf(num, "%d", i);
+			execl("./mapper", "./mapper", num, NULL);
 		}
 	}
 	
@@ -59,8 +61,8 @@ int main(int argc, char *argv[]) {
 		reducerPid = fork();
 		if (reducerPid > 0) {
 			//TODO: exec here
-			char* num[10];
-			sprintf(&num, "%d", i);
+			char num[10];
+			sprintf(num, "%d", i);
 			execl("./reducer", "./reducer", &num, NULL);
 		}
 	}
