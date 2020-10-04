@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
 			//TODO: exec here
 			char num[10];
 			sprintf(num, "%d", i);
-			execl("./mapper", "./mapper", num, NULL);
+			execl("./mapper", "./mapper", &num, NULL);
 		}
 	}
 	
