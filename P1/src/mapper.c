@@ -116,6 +116,7 @@ void writeIntermediateDS() {
 		sprintf(filename, "output/map_%d/%s.txt", mapperID, tempNode -> key);
 		FILE* fptr = fopen(filename, "w");
 		tempNode = tempNode -> next;
+		fclose(fptr);
 	}
 }
 
