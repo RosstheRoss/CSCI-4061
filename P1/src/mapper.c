@@ -23,14 +23,14 @@ valueList *insertNewValueToList(valueList *root, char *count){
 
 // free value list
 void freeValueList(valueList *root) {
-if(root == NULL) return;
+	if(root == NULL) return;
 
-valueList *tempNode = NULL;
-while (root != NULL){
-tempNode = root;
-root = root -> next;
-free(tempNode);
-}
+	valueList *tempNode = NULL;
+	while (root != NULL){
+		tempNode = root;
+		root = root -> next;
+		free(tempNode);
+	}
 }
 
 // create <word, value list>
@@ -73,6 +73,8 @@ void freeInterDS(intermediateDS *root) {
 		tempNode = root;
 		root = root -> next;
 		freeValueList(tempNode -> value);
+		//THIS FREE BREAKS ONCE PER PROCESS
+		//WILL PROBABLY BE FIXED IF THE EMPTY FILES PROBLEM GETS FIXED
 		free(tempNode);
 	}
 }
