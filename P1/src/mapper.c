@@ -23,14 +23,14 @@ valueList *insertNewValueToList(valueList *root, char *count){
 
 // free value list
 void freeValueList(valueList *root) {
-	if(root == NULL) return;
+if(root == NULL) return;
 
-	valueList *tempNode = NULL;
-	while (root != NULL){
-		tempNode = root;
-		root = root -> next;
-		free(tempNode);
-	}
+valueList *tempNode = NULL;
+while (root != NULL){
+tempNode = root;
+root = root -> next;
+free(tempNode);
+}
 }
 
 // create <word, value list>
@@ -69,12 +69,12 @@ void freeInterDS(intermediateDS *root) {
 if(root == NULL) return;
 
 intermediateDS *tempNode = NULL;
-while (root != NULL) {
-	tempNode = root;
-	root = root -> next;
-	freeValueList(tempNode -> value);
-	free(tempNode);
-	}
+while (root != NULL){
+tempNode = root;
+root = root -> next;
+freeValueList(tempNode -> value);
+free(tempNode);
+}
 }
 
 // emit the <key, value> into intermediate DS 
@@ -106,10 +106,10 @@ void writeIntermediateDS() {
 
 	while(tempNode != NULL) {
 		// Get string of 1's associated with the word
-		char ones[100];
-		// tempNode2 = tempNode2 -> value; 
+		char ones[100]= "";
+		tempNode2 = tempNode -> value; 
 		while(tempNode2 != NULL) {
-			printf("This loop is being run\n");
+			//printf("This loop is being run\n");
 			strcat(ones, "1 ");
 			tempNode2 = tempNode2 -> next;
 		}
@@ -121,7 +121,7 @@ void writeIntermediateDS() {
 		fclose(fptr);
 		tempNode = tempNode -> next;
 	}
-	freeInterDS(root);
+	//freeInterDS(root);
 }
 
 int main(int argc, char *argv[]) {
