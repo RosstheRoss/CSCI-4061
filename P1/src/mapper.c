@@ -111,7 +111,6 @@ void writeIntermediateDS() {
 		char ones[100]= "";
 		tempNode2 = tempNode -> value; 
 		while(tempNode2 != NULL) {
-			//printf("This loop is being run\n");
 			strcat(ones, "1 ");
 			tempNode2 = tempNode2 -> next;
 		}
