@@ -113,7 +113,7 @@ void writeIntermediateDS() {
 		}
 
 		// Shove word and ones in a file named word.txt
-		char filename[100];
+		char filename[50];
 		sprintf(filename, "output/MapOut/Map_%d/%s.txt", mapperID, tempNode -> key);
 		FILE* fptr = fopen(filename, "w");
 		fprintf(fptr, "%s %s", tempNode -> key, ones);
