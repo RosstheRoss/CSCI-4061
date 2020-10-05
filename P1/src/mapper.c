@@ -66,15 +66,15 @@ intermediateDS *insertPairToInterDS(intermediateDS *root, char *word, char *coun
 
 // free the DS after usage. Call this once you are done with the writing of DS into file
 void freeInterDS(intermediateDS *root) {
-if(root == NULL) return;
+	if(root == NULL) return;
 
-intermediateDS *tempNode = NULL;
-while (root != NULL){
-tempNode = root;
-root = root -> next;
-freeValueList(tempNode -> value);
-free(tempNode);
-}
+	intermediateDS *tempNode = NULL;
+	while (root != NULL){
+		tempNode = root;
+		root = root -> next;
+		freeValueList(tempNode -> value);
+		free(tempNode);
+	}
 }
 
 // emit the <key, value> into intermediate DS 
@@ -121,7 +121,7 @@ void writeIntermediateDS() {
 		fclose(fptr);
 		tempNode = tempNode -> next;
 	}
-	//freeInterDS(root);
+	freeInterDS(root);
 }
 
 int main(int argc, char *argv[]) {
