@@ -1,6 +1,6 @@
 #include "reducer.h"
 
-fianlKeyValueDS DS;
+finalKeyValueDS DS;
 
 // create a key value node
 finalKeyValueDS *createFinalKeyValueNode(char *word, int count){
