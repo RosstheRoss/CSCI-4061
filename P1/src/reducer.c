@@ -1,5 +1,7 @@
 #include "reducer.h"
 
+fianlKeyValueDS DS;
+
 // create a key value node
 finalKeyValueDS *createFinalKeyValueNode(char *word, int count){
 	finalKeyValueDS *newNode = (finalKeyValueDS *)malloc (sizeof(finalKeyValueDS));
@@ -49,7 +51,20 @@ void reduce(char *key) {
 // write the contents of the final intermediate structure
 // to output/ReduceOut/Reduce_reducerID.txt
 void writeFinalDS(int reducerID){
-	
+		
+	finalKeyValueDS *root = &DS;
+	finalKeyValueDS *tempNode = root;
+
+	while(tempNode != NULL) {
+		// Shove word and ones in a file named word.txt
+		char filename[150];
+		sprintf(filename, "output/MapOut/Map_%d/%s.txt", reducerID, tempNode -> key);
+		FILE* fptr = fopen(filename, "w");
+		fprintf(fptr, "%s %d", tempNode -> key, tempNode -> value);
+		fclose(fptr);
+		tempNode = tempNode -> next;
+	}
+	freeFinalDS(root);
 }
 
 int main(int argc, char *argv[]) {
