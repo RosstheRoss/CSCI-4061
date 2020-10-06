@@ -4,9 +4,12 @@ The first project in CSCI 4061: Intro to Operating Systems.
 
 ## Fall 2020
 
-test machine: apollo.cselabs.umn.edu
-date: 10/3/2020
-name: Andrea Smith , Matt Strapp
+Test machine: apollo.cselabs.umn.edu
+
+Date: 10/3/2020
+
+Name: Andrea Smith , Matt Strapp
+
 x500: smit9523, strap012
 
 The purpose of this program is to recreate the mapreduce programming model for Big Data Analytics. In order to compile this program, simply run the included Makefile, which takes no arguments.
