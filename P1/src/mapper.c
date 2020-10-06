@@ -104,12 +104,12 @@ void writeIntermediateDS() {
 	
 	intermediateDS *root = &DS;
 	intermediateDS *tempNode = root -> next;
-	valueList *tempNode2 = tempNode -> value;
+	// valueList *tempNode2 = tempNode -> value;
 
 	while(tempNode != NULL) {
 		// Get string of 1's associated with the word
 		char ones[BUFFSIZE]= "";
-		tempNode2 = tempNode -> value; 
+		valueList *tempNode2 = tempNode -> value; 
 		while(tempNode2 != NULL) {
 			strcat(ones, "1 ");
 			tempNode2 = tempNode2 -> next;
