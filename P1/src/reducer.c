@@ -48,8 +48,22 @@ void reduce(char *key) {
 	// Calculate the total count of values (1's) for the word from [the_word].txt
 	// Store the total count in finalKeyValueDS
 	// Lather, rinse, repeat for all the words
+	FILE* fptr = fopen(key, "r");
 	
+	char word[BUFFSIZE] = ""; 
+	fgets(word, BUFFSIZE, fptr); // Buffer is currently entire [the_word].txt file
+	
+	char *parsedKey = strtok(word, " "); // Parses input by whitespaces
+	char *parsedWord = parsedKey; // Save the first token, which is the word. It's a surprise tool that will help us later.
 
+	int count = 0;
+	while(parsedKey != NULL) {
+		count++;
+		parsedKey = strtok(NULL, " ");
+	}
+
+	fclose(fptr);
+	insertNewKeyValue(&DS, parsedWord, count);
 }
 
 // write the contents of the final intermediate structure
