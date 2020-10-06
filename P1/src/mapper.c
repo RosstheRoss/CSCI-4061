@@ -103,8 +103,8 @@ void map(char *chunkData){
 void writeIntermediateDS() {
 	
 	intermediateDS *root = &DS;
-	intermediateDS *tempNode = root;
-	valueList *tempNode2 = root -> value;
+	intermediateDS *tempNode = root -> next;
+	valueList *tempNode2 = tempNode -> value;
 
 	while(tempNode != NULL) {
 		// Get string of 1's associated with the word
@@ -116,7 +116,9 @@ void writeIntermediateDS() {
 		}
 		// Shove word and ones in a file named word.txt
 		char filename[150] = "";
-		sprintf(filename, "output/MapOut/Map_%d/%s.txt", mapperID, tempNode -> key);
+		//sprintf(filename, "output/MapOut/Map_%d/%s.txt", mapperID, tempNode -> key);
+		sprintf(filename, "%s/%s.txt", mapOutDir, tempNode -> key);
+		printf("%s\n", filename);
 		FILE* fptr = fopen(filename, "w");
 		fprintf(fptr, "%s %s", tempNode -> key, ones);
 		fclose(fptr);
@@ -141,7 +143,6 @@ int main(int argc, char *argv[]) {
 	// mapOutDir has the path to the folder where the outputs of 
 	// this mapper should be stored
 	mapOutDir = createMapDir(mapperID);
-
 	// ###### DO NOT REMOVE ######
 	while(1) {
 		// create an array of chunkSize=1024B and intialize all 
