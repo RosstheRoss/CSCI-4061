@@ -34,7 +34,6 @@ int main(int argc, char *argv[]) {
 	for (int i = 1; i <= nMappers; i++) {
 		mapperPid = fork();
 		if (mapperPid == 0) {
-			//TODO: exec here
 			char numMap[10];
 			sprintf(numMap, "%d", i);
 			execl("./mapper", "./mapper", &numMap, NULL);
@@ -47,7 +46,6 @@ int main(int argc, char *argv[]) {
 	}
 	
     for (int i = 0; i <= nMappers; i++) {
-		//Hopefully this works
 		int waitError = wait(NULL);
 		if (waitError == -1)
 		{
@@ -83,7 +81,6 @@ int main(int argc, char *argv[]) {
 	}
 
 	for (int i = 0; i <= nReducers; i++) {
-		//Maybe this works too?
 		int waitError = wait(NULL);
 		if (waitError == -1) {
 			printf("Wait failed!\n");
