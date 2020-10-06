@@ -11,6 +11,10 @@ int main(int argc, char *argv[]) {
 	// ###### DO NOT REMOVE ######
 	int nMappers 	= strtol(argv[1], NULL, 10);
 	int nReducers 	= strtol(argv[2], NULL, 10);
+	if (nMappers < nReducers) {
+		printf("Number of mappers must be greater than or equal to the number of reducers.\n");
+		exit(2);
+	}
 	char *inputFile = argv[3];
 
 	// ###### DO NOT REMOVE ######
