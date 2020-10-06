@@ -75,7 +75,7 @@ void writeFinalDS(int reducerID){
 
 	while(tempNode != NULL) {
 		// Shove word and number of occurances in a file named word.txt
-		char filename[BUFFSIZE] = "";
+		char filename[DIRSIZE] = "";
 		sprintf(filename, "output/ReduceOut/Reduce_%d.txt", reducerID);
 		FILE* fptr = fopen(filename, "a");	//append, not overwrite.
 		fprintf(fptr, "%s %d\n", tempNode -> key, tempNode -> value);

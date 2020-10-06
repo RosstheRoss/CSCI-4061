@@ -119,7 +119,7 @@ void writeIntermediateDS() {
 		}
 
 		// Put words and their corresponding 1's in a file named [the word].txt
-		char filename[BUFFSIZE] = "";
+		char filename[DIRSIZE] = "";
 		sprintf(filename, "%s/%s.txt", mapOutDir, tempNode -> key);
 		FILE* fptr = fopen(filename, "w");
 		fprintf(fptr, "%s %s", tempNode -> key, ones);
