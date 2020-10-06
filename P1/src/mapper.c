@@ -118,7 +118,6 @@ void writeIntermediateDS() {
 		char filename[150] = "";
 		//sprintf(filename, "output/MapOut/Map_%d/%s.txt", mapperID, tempNode -> key);
 		sprintf(filename, "%s/%s.txt", mapOutDir, tempNode -> key);
-		printf("%s\n", filename);
 		FILE* fptr = fopen(filename, "w");
 		fprintf(fptr, "%s %s", tempNode -> key, ones);
 		fclose(fptr);
