@@ -80,7 +80,7 @@ void freeInterDS(intermediateDS *root) {
 }
 
 // emit the <key, value> into intermediate DS 
-// eats the data into the DS
+// Eats data into the intermediate DS
 void emit(char *key, char *value) {
 	insertPairToInterDS(&DS, key, value);
 }
@@ -90,7 +90,7 @@ void map(char *chunkData){
 	int i = 0;
 	char *buffer;
 	while ((buffer = getWord(chunkData, &i)) != NULL){
-		// get words from buffer & give it to emitter to be put into intermediateDS
+		// Get words from buffer & give it to emitter to be put into intermediateDS
 		emit(buffer, "1");
 	}
 	// you can use getWord to retrieve words from the 
@@ -99,25 +99,27 @@ void map(char *chunkData){
 
 // write intermediate data to separate word.txt files
 // Each file will have only one line : word 1 1 1 1 1 ...
-// poops the data out into separate .txt files named after the word
+// Yeets the data out into separate [the word].txt files
 void writeIntermediateDS() {
 	
 	intermediateDS *root = &DS;
 	intermediateDS *tempNode = root -> next;
 
+	// Traverse the intermediate DS
 	while(tempNode != NULL) {
 		// Get string of 1's associated with the word
 		char ones[BUFFSIZE]= "";
 		valueList *tempNode2 = tempNode -> value; 
 
+		// Traverse nested valueList 
 		// Kinda jank way to deal with collecting the word's corresponding 1's
 		while(tempNode2 != NULL) {
 			strcat(ones, "1 ");
 			tempNode2 = tempNode2 -> next;
 		}
-		// Put words and their corresponding 1's in a file named word.txt
+
+		// Put words and their corresponding 1's in a file named [the word].txt
 		char filename[BUFFSIZE] = "";
-		//sprintf(filename, "output/MapOut/Map_%d/%s.txt", mapperID, tempNode -> key);
 		sprintf(filename, "%s/%s.txt", mapOutDir, tempNode -> key);
 		FILE* fptr = fopen(filename, "w");
 		fprintf(fptr, "%s %s", tempNode -> key, ones);
