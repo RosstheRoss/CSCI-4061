@@ -123,7 +123,7 @@ void writeIntermediateDS() {
 		fclose(fptr);
 		tempNode = tempNode -> next;
 	}
-	freeInterDS(root);
+	freeInterDS(root -> next);
 }
 
 int main(int argc, char *argv[]) {
