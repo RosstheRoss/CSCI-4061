@@ -24,4 +24,4 @@ Reducer receives the word.txt files and "reduces" them into n files (where n is 
 
 #### Team Contributions:
 
-As can be seen by the number of back-and-forth GitHub commits, this project was thoroughly a team effort. However, for the purposes of appropriating (what I am sure will be) praise from the professors and TA's (just kidding!), Matt wrote mapreduce, Andrea wrote reducer, and mapper was written by both of us.
+As can be seen by the number of back-and-forth GitHub commits, this project was thoroughly a team effort. However, for the purposes of ~~appropriating praise from the professors and TA's~~ giving credit where it is due, Matt wrote mapreduce, Andrea wrote reducer, and mapper was written by both of us.
