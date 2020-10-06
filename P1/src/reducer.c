@@ -45,6 +45,10 @@ void freeFinalDS(finalKeyValueDS *root) {
 
 // reduce function
 void reduce(char *key) {
+	// Calculate the total count of values (1's) for the word from [the_word].txt
+	// Store the total count in finalKeyValueDS
+	// Lather, rinse, repeat for all the words
+	
 
 }
 
@@ -60,11 +64,11 @@ void writeFinalDS(int reducerID){
 		char filename[BUFFSIZE] = "";
 		sprintf(filename, "output/ReduceOut/Reduce_%d.txt", reducerID);
 		FILE* fptr = fopen(filename, "w");
-		fprintf(fptr, "%s %s", tempNode -> key, tempNode -> value);
+		fprintf(fptr, "%s %d", tempNode -> key, tempNode -> value);
 		fclose(fptr);
 		tempNode = tempNode -> next;
 	}
-	freeInterDS(root -> next);
+	freeFinalDS(root -> next);
 }
 
 int main(int argc, char *argv[]) {
