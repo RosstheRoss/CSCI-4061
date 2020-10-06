@@ -109,11 +109,13 @@ void writeIntermediateDS() {
 		// Get string of 1's associated with the word
 		char ones[BUFFSIZE]= "";
 		valueList *tempNode2 = tempNode -> value; 
+
+		// Kinda jank way to deal with collecting the word's corresponding 1's
 		while(tempNode2 != NULL) {
 			strcat(ones, "1 ");
 			tempNode2 = tempNode2 -> next;
 		}
-		// Shove word and ones in a file named word.txt
+		// Put words and their corresponding 1's in a file named word.txt
 		char filename[BUFFSIZE] = "";
 		//sprintf(filename, "output/MapOut/Map_%d/%s.txt", mapperID, tempNode -> key);
 		sprintf(filename, "%s/%s.txt", mapOutDir, tempNode -> key);
