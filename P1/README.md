@@ -14,7 +14,7 @@ The purpose of this program is to recreate the mapreduce programming model for B
 ```mapreduce.c:```
 Mapreduce is the master phase of this program. It is responsible for calling the mapper and reducer processes. It will wait for each process to finish executing before exiting the code.
 
-````mapper.c:```
+```mapper.c:```
  Mapper receives a chunk of data and emits it into an intermediate data structure, which is a two-level linked list. writeIntermediateDS() formats the data, writing each word and its associated "1's" in the form "word 1 1 1..." to its own file, word.txt.
 
 ```reducer.c:```
