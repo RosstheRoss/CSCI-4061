@@ -5,7 +5,6 @@ The first project in CSCI 4061: Intro to Operating Systems.
 ## Fall 2020
 
 Test machine: apollo.cselabs.umn.edu
-
 Date: 10/3/2020
 
 Name: Andrea Smith , Matt Strapp
