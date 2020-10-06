@@ -58,7 +58,7 @@ void reduce(char *key) {
 
 	int count = 0;
 	while(parsedKey != NULL) {
-		count++;
+		count += atoi(parsedKey);
 		parsedKey = strtok(NULL, " ");
 	}
 
@@ -77,8 +77,8 @@ void writeFinalDS(int reducerID){
 		// Shove word and number of occurances in a file named word.txt
 		char filename[BUFFSIZE] = "";
 		sprintf(filename, "output/ReduceOut/Reduce_%d.txt", reducerID);
-		FILE* fptr = fopen(filename, "w");
-		fprintf(fptr, "%s %d", tempNode -> key, tempNode -> value);
+		FILE* fptr = fopen(filename, "a");
+		fprintf(fptr, "%s %d\n", tempNode -> key, tempNode -> value);
 		fclose(fptr);
 		tempNode = tempNode -> next;
 	}
