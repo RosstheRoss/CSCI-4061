@@ -1,5 +1,7 @@
 # CSCI 4061: Project 1
 
+The first project in CSCI 4061: Intro to Operating Systems.
+
 ## Fall 2020
 
 test machine: apollo.cselabs.umn.edu
