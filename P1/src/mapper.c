@@ -104,7 +104,6 @@ void writeIntermediateDS() {
 	
 	intermediateDS *root = &DS;
 	intermediateDS *tempNode = root -> next;
-	// valueList *tempNode2 = tempNode -> value;
 
 	while(tempNode != NULL) {
 		// Get string of 1's associated with the word
