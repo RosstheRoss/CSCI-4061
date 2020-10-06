@@ -51,20 +51,20 @@ void reduce(char *key) {
 // write the contents of the final intermediate structure
 // to output/ReduceOut/Reduce_reducerID.txt
 void writeFinalDS(int reducerID){
-		
+	
 	finalKeyValueDS *root = &DS;
-	finalKeyValueDS *tempNode = root;
+	finalKeyValueDS *tempNode = root -> next;
 
 	while(tempNode != NULL) {
-		// Shove word and ones in a file named word.txt
-		char filename[150];
-		sprintf(filename, "output/MapOut/Map_%d/%s.txt", reducerID, tempNode -> key);
+		// Shove word and number of occurances in a file named word.txt
+		char filename[BUFFSIZE] = "";
+		sprintf(filename, "output/ReduceOut/Reduce_%d.txt", reducerID);
 		FILE* fptr = fopen(filename, "w");
-		fprintf(fptr, "%s %d", tempNode -> key, tempNode -> value);
+		fprintf(fptr, "%s %s", tempNode -> key, tempNode -> value);
 		fclose(fptr);
 		tempNode = tempNode -> next;
 	}
-	freeFinalDS(root);
+	freeInterDS(root -> next);
 }
 
 int main(int argc, char *argv[]) {
