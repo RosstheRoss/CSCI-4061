@@ -108,14 +108,14 @@ void writeIntermediateDS() {
 
 	while(tempNode != NULL) {
 		// Get string of 1's associated with the word
-		char ones[100]= "";
+		char ones[BUFFSIZE]= "";
 		tempNode2 = tempNode -> value; 
 		while(tempNode2 != NULL) {
 			strcat(ones, "1 ");
 			tempNode2 = tempNode2 -> next;
 		}
 		// Shove word and ones in a file named word.txt
-		char filename[150] = "";
+		char filename[BUFFSIZE] = "";
 		//sprintf(filename, "output/MapOut/Map_%d/%s.txt", mapperID, tempNode -> key);
 		sprintf(filename, "%s/%s.txt", mapOutDir, tempNode -> key);
 		FILE* fptr = fopen(filename, "w");
