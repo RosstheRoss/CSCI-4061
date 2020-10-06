@@ -18,7 +18,7 @@
 #define MSGSIZE 1100
 #define ENDTYPE 1000
 #define ACKTYPE 1100
-#define BUFFSIZE 150
+#define BUFFSIZE 1000
 
 struct msgBuffer {
     long msgType;
