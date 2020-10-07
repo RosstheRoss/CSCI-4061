@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
 		if (mapperPid == 0) {
 			char numMap[10];
 			sprintf(numMap, "%d", i);
-			execl("./mapper", "./mapper", &numMap, NULL);
+			execl("./mapper", "./mapper", numMap, NULL);
 			printf("Mapper execution failed! Make sure \"mapper\" exists in the directory.\n");
 			return 2;
 		} else if (mapperPid == -1) {
@@ -76,7 +76,7 @@ int main(int argc, char *argv[]) {
 		if (reducerPid == 0) {
 			char numRed[10];
 			sprintf(numRed, "%d", i);
-			execl("./reducer", "./reducer", &numRed, NULL);
+			execl("./reducer", "./reducer", numRed, NULL);
 			printf("Reducer execution failed! Make sure \"reducer\" exists in the directory.\n");
 			return 2;
 		} else if (reducerPid == -1) {
