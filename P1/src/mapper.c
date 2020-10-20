@@ -73,8 +73,6 @@ void freeInterDS(intermediateDS *root) {
 		tempNode = root;
 		root = root -> next;
 		freeValueList(tempNode -> value);
-		//THIS FREE BREAKS ONCE PER PROCESS
-		//WILL PROBABLY BE FIXED IF THE EMPTY FILES PROBLEM GETS FIXED
 		free(tempNode);
 	}
 }
