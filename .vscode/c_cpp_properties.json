@@ -1,9 +1,9 @@
 {
     "configurations": [
         {
-            "name": "Linux",
+            "name": "Linux (Project 2)",
             "includePath": [
-                "${workspaceFolder}"
+                "${workspaceFolder}/P2/include"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",
