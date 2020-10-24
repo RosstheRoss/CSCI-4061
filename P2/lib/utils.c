@@ -15,7 +15,7 @@ void sendChunkData(char *inputFile, int nMappers) {
 	FILE *fptr = fopen(inputFile, "r");
 
 	// construct chunks of 1024 bytes
-	while(fgets(msgText, chunkSize, fptr)) {
+	while(fgets(message, chunkSize, fptr) != EOF) {
 		
 	}
 }
