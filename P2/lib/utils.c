@@ -1,15 +1,19 @@
 #include "utils.h"
 
-struct msg_t {
-	long tag; // Message type, must be > 0. Value will be used by msgrcv()
-	char text[MSGSIZE]; // Message data 
-};
-
 char *getChunkData(int mapperID) {
 }
 
 // sends chunks of size 1024 to the mappers in RR fashion
 void sendChunkData(char *inputFile, int nMappers) {
+	key_t key;
+	int msgid;
+
+	// open message queue
+	msgid = msgget(key, 0666 | IPC_CREAT);
+	msgBuffer -> msgText = 1;
+
+	// construct chunks of 1024 bytes
+	
 }
 
 // hash function to divide the list of word.txt files across reducers
