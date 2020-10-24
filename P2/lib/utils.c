@@ -1,8 +1,8 @@
 #include "utils.h"
 
 struct msg_t {
-	long tag;
-	char text[MSGSIZE];
+	long tag; // Message type, must be > 0. Value will be used by msgrcv()
+	char text[MSGSIZE]; // Message data 
 };
 
 char *getChunkData(int mapperID) {
