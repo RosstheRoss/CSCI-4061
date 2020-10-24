@@ -23,6 +23,34 @@ char *getChunkData(int mapperID) {
 
 // sends chunks of size 1024 to the mappers in RR fashion
 void sendChunkData(char *inputFile, int nMappers) {
+	struct msgBuffer message;
+	key_t key = 10;
+	int msgid;
+
+	// open message queue
+	msgid = msgget(key, 0666 | IPC_CREAT);
+	message -> msgText = 1;
+	FILE *fptr = fopen(inputFile, "r");
+
+	// construct chunks of 1024 bytes
+	while(fgets(message, chunkSize, fptr) != EOF) {
+
+		/*  Go to the end of the chunk, check if final character 
+		    is a space if character is a space, do nothing
+		    else cut off before that word and put back file      */
+		// TODO! help 
+
+		msgsnd(msgid, &msgText, mapperID);
+	}
+
+	for (int i = 1; i < mapperID; i++) {
+		msgsnd(msgid, (void*)&END, MSGSIZE, i);
+
+		// TODO! does this need to be in another loop or is blocking good enough?
+		msgrcv(msgid, (void*)&ACK, MSGSIZE, i);
+	}
+
+	msgctl(msgid, IPC_RMID, 0); // close that bih
 }
 
 // hash function to divide the list of word.txt files across reducers
