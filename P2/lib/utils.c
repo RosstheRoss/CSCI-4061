@@ -1,6 +1,10 @@
 #include "utils.h"
 
 char *getChunkData(int mapperID) {
+	int mid;
+	key_t key = 10;
+	mid = msgget();
+
 }
 
 // sends chunks of size 1024 to the mappers in RR fashion
