@@ -18,8 +18,7 @@ char *getChunkData(int mapperID) {
 		struct msgBuffer ACK = {mapperID, "ACK"};
 		msgsnd(mid, (void *) &ACK, MSGSIZE, 0);
 	}
-	char *returnValue = message -> msgText;
-	return returnValue;
+	return message -> msgText;
 }
 
 // sends chunks of size 1024 to the mappers in RR fashion
