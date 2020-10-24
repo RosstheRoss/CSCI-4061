@@ -5,8 +5,8 @@ char *getChunkData(int mapperID) {
 
 // sends chunks of size 1024 to the mappers in RR fashion
 void sendChunkData(char *inputFile, int nMappers) {
-	msgBuffer message;
-	key_t key;
+	struct msgBuffer message;
+	key_t key = 10;
 	int msgid;
 
 	// open message queue
@@ -16,8 +16,23 @@ void sendChunkData(char *inputFile, int nMappers) {
 
 	// construct chunks of 1024 bytes
 	while(fgets(message, chunkSize, fptr) != EOF) {
-		
+
+		/*  Go to the end of the chunk, check if final character 
+		    is a space if character is a space, do nothing
+		    else cut off before that word and put back file      */
+		// TODO! help 
+
+		msgsnd(msgid, &msgText, mapperID);
 	}
+
+	for (int i = 1; i < mapperID; i++) {
+		msgsnd(msgid, (void*)&END, MSGSIZE, i);
+
+		// TODO! does this need to be in another loop or is blocking good enough?
+		msgrcv(msgid, (void*)&ACK, MSGSIZE, i);
+	}
+
+	msgctl(msgid, IPC_RMID, 0); // close that bih
 }
 
 // hash function to divide the list of word.txt files across reducers
