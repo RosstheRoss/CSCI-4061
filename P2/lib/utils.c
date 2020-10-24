@@ -3,7 +3,11 @@
 char *getChunkData(int mapperID) {
 	int mid;
 	key_t key = 10;
-	mid = msgget();
+	mid = msgget(key, 0666);
+	if (mid < 0) {
+		perror("Cannot open queue.\n");
+		exit(0);
+	}
 
 }
 
