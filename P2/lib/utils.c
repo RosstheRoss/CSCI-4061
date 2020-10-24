@@ -1,14 +1,23 @@
 #include "utils.h"
 
 char *getChunkData(int mapperID) {
+	//Message
+	struct msgBuffer* message;
+	//Queue ID
 	int mid;
+	//Queue Key
 	key_t key = 10;
 	mid = msgget(key, 0666);
 	if (mid < 0) {
 		perror("Cannot open queue.\n");
-		exit(0);
+		return NULL;
 	}
-
+	msgrcv(mid, (void *) &message, MSGSIZE, mapperID, 0);
+	if (strcmp("END", message -> msgText)) {
+		msgsnd(mid, (void *) "ACK", 3, 0);
+	}
+	char* returnValue = message -> msgText;
+	return returnValue;
 }
 
 // sends chunks of size 1024 to the mappers in RR fashion
