@@ -3,7 +3,7 @@
 char *getChunkData(int mapperID) {
 	//Message
 	struct msgBuffer* message;
-	//Queue ID
+	//Queue ID, not sure what it actually does
 	int mid;
 	//Queue Key
 	key_t key = 10;
