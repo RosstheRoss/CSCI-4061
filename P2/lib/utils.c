@@ -5,19 +5,6 @@ char *getChunkData(int mapperID) {
 
 // sends chunks of size 1024 to the mappers in RR fashion
 void sendChunkData(char *inputFile, int nMappers) {
-	msgBuffer message;
-	key_t key;
-	int msgid;
-
-	// open message queue
-	msgid = msgget(key, 0666 | IPC_CREAT);
-	message -> msgText = 1;
-	FILE *fptr = fopen(inputFile, "r");
-
-	// construct chunks of 1024 bytes
-	while(fgets(message, chunkSize, fptr) != EOF) {
-		
-	}
 }
 
 // hash function to divide the list of word.txt files across reducers
