@@ -1,5 +1,6 @@
 #include "utils.h"
 
+//Receive from send and return the chonk
 char *getChunkData(int mapperID) {
 	//Message
 	struct msgBuffer* message;
@@ -17,7 +18,7 @@ char *getChunkData(int mapperID) {
 		struct msgBuffer ACK = {mapperID, "ACK"};
 		msgsnd(mid, (void *) &ACK, MSGSIZE, 0);
 	}
-	char* returnValue = message -> msgText;
+	char *returnValue = message -> msgText;
 	return returnValue;
 }
 
