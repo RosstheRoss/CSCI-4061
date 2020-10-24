@@ -1,5 +1,10 @@
 #include "utils.h"
 
+struct msg_t {
+	long tag;
+	char text[MSGSIZE];
+};
+
 char *getChunkData(int mapperID) {
 }
 
