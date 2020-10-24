@@ -14,7 +14,8 @@ char *getChunkData(int mapperID) {
 	}
 	msgrcv(mid, (void *) &message, MSGSIZE, mapperID, 0);
 	if (strcmp("END", message -> msgText)) {
-		msgsnd(mid, (void *) "ACK", 3, 0);
+		struct msgBuffer ACK = {mapperID, "ACK"};
+		msgsnd(mid, (void *) &ACK, MSGSIZE, 0);
 	}
 	char* returnValue = message -> msgText;
 	return returnValue;
