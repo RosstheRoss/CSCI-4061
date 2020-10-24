@@ -1,5 +1,4 @@
 #include "utils.h"
-#define ACCESSPERMS 0777
 
 char *getChunkData(int mapperID) {
 }
