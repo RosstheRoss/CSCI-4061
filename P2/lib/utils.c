@@ -8,7 +8,7 @@ char *getChunkData(int mapperID) {
 	int mid;
 	//Queue Key
 	key_t key = 10;
-	mid = msgget(key, 0666);
+	mid = msgget(key, 0666 | IPC_CREAT);
 	if (mid < 0) {
 		perror("Cannot open queue.\n");
 		return NULL;
@@ -30,6 +30,10 @@ void sendChunkData(char *inputFile, int nMappers) {
 
 	// open message queue
 	msgid = msgget(key, 0666 | IPC_CREAT);
+	if (msgid < 0) {
+		perror("Cannot open queue.\n");
+		exit(-1);
+	}
 	// message.msgText = 1;
 	FILE *fptr = fopen(inputFile, "r");
 
