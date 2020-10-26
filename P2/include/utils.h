@@ -23,6 +23,7 @@ struct msgBuffer {
 };
 
 // mapper side
+
 int validChar(char c);
 char *getWord(char *chunk, int *i);
 char *getChunkData(int mapperID);
@@ -30,6 +31,7 @@ void sendChunkData(char *inputFile, int nMappers);
 
 
 // reducer side
+
 int hashFunction(char* key, int reducers);
 int getInterData(char *key, int reducerID);
 void shuffle(int nMappers, int nReducers);
