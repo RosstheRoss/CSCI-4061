@@ -44,7 +44,7 @@ void sendChunkData(char *inputFile, int nMappers) {
 		    else cut off before that word and put back file      */
 		// TODO! help 
 
-		msgsnd(msgid, &message, mapperID);
+		msgsnd(msgid, &message, mapperID, 0);
 	}
 
 	for (long i = 1; i < nMappers; i++) {
