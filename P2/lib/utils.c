@@ -13,18 +13,18 @@ char *getChunkData(int mapperID) {
 		perror("Cannot open queue.\n");
 		return NULL;
 	}
-	msgrcv(mid, (void *) &message, MSGSIZE, mapperID, 0);
+	msgrcv(mid, &message, MSGSIZE, mapperID, 0);
 	if (strcmp("END", message -> msgText)) {
 		struct msgBuffer ACK = {mapperID, "ACK"};
-		msgsnd(mid, (void *) &ACK, MSGSIZE, 0);
+		msgsnd(mid, &ACK, MSGSIZE, 0);
 	}
-	msgctl(mid, IPC_RMID, 0);
+	// msgctl(mid, IPC_RMID, 0);
 	return message -> msgText;
 }
 
 // sends chunks of size 1024 to the mappers in RR fashion
 void sendChunkData(char *inputFile, int nMappers) {
-	struct msgBuffer *message;
+	struct msgBuffer message;
 	key_t key = 10;
 	int msgid;
 
@@ -34,24 +34,24 @@ void sendChunkData(char *inputFile, int nMappers) {
 	FILE *fptr = fopen(inputFile, "r");
 
 	// construct chunks of 1024 bytes
-	while(fgets(message, chunkSize, fptr) != EOF) {
+	while(fgets(&message, chunkSize, fptr) != EOF) {
 
 		/*  Go to the end of the chunk, check if final character 
 		    is a space if character is a space, do nothing
 		    else cut off before that word and put back file      */
 		// TODO! help 
 
-		msgsnd(msgid, &msgText, mapperID);
+		msgsnd(msgid, &message, mapperID);
 	}
 
-	for (int i = 1; i < mapperID; i++) {
-		msgsnd(msgid, (void*)&END, MSGSIZE, i);
+	for (int i = 1; i < nMappers; i++) {
+		msgsnd(msgid, &END, MSGSIZE, i);
 
 		// TODO! does this need to be in another loop or is blocking good enough?
-		msgrcv(msgid, (void*)&ACK, MSGSIZE, i);
+		msgrcv(msgid, &ACK, MSGSIZE, i);
 	}
 
-	msgctl(msgid, IPC_RMID, 0); // close that bih
+	// msgctl(msgid, IPC_RMID, 0); // close that bih
 }
 
 // hash function to divide the list of word.txt files across reducers
