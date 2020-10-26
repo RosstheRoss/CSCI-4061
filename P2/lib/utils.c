@@ -3,7 +3,7 @@
 //Receive from send and return the chonk
 char *getChunkData(int mapperID) {
 	//Message
-	struct msgBuffer* message;
+	struct msgBuffer message;
 	//Queue ID, not sure what it actually does
 	int mid;
 	//Queue Key
@@ -14,12 +14,12 @@ char *getChunkData(int mapperID) {
 		return NULL;
 	}
 	msgrcv(mid, &message, MSGSIZE, mapperID, 0);
-	if (strcmp("END", message -> msgText)) {
+	if (strcmp("END", message.msgText)) {
 		struct msgBuffer ACK = {mapperID, "ACK"};
 		msgsnd(mid, &ACK, MSGSIZE, 0);
 	}
 	// msgctl(mid, IPC_RMID, 0);
-	return message -> msgText;
+	return message.msgText;
 }
 
 // sends chunks of size 1024 to the mappers in RR fashion
@@ -30,7 +30,7 @@ void sendChunkData(char *inputFile, int nMappers) {
 
 	// open message queue
 	msgid = msgget(key, 0666 | IPC_CREAT);
-	message -> msgText = 1;
+	// message.msgText = 1;
 	FILE *fptr = fopen(inputFile, "r");
 
 	// construct chunks of 1024 bytes
@@ -44,11 +44,12 @@ void sendChunkData(char *inputFile, int nMappers) {
 		msgsnd(msgid, &message, mapperID);
 	}
 
-	for (int i = 1; i < nMappers; i++) {
-		msgsnd(msgid, &END, MSGSIZE, i);
+	for (long i = 1; i < nMappers; i++) {
+		struct msgBuffer END = {i, "END"};
+		msgsnd(msgid, &END, MSGSIZE, 0);
 
 		// TODO! does this need to be in another loop or is blocking good enough?
-		msgrcv(msgid, &ACK, MSGSIZE, i);
+		msgrcv(msgid, &message, MSGSIZE, i, 0);
 	}
 
 	// msgctl(msgid, IPC_RMID, 0); // close that bih
