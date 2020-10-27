@@ -17,7 +17,6 @@ char *getChunkData(int mapperID) {
 	// 	struct msgBuffer ACK = {mapperID, "ACK"};
 	// 	msgsnd(mid, &ACK, MSGSIZE, 0);
 	// }
-	// msgctl(mid, IPC_RMID, 0);
 	return message.msgText;
 }
 
@@ -55,7 +54,6 @@ void sendChunkData(char *inputFile, int nMappers) {
 		msgrcv(msgid, &message, MSGSIZE, i, 0);
 	}
 
-	// msgctl(msgid, IPC_RMID, 0); // close that bih
 }
 
 // hash function to divide the list of word.txt files across reducers
