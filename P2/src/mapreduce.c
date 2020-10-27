@@ -42,9 +42,7 @@ int main(int argc, char *argv[]) {
 		printf("ERROR: Mapper and Reducer count should be grater than zero...\n");
 		exit(0);
 	}
-	
 	char *inputFile = argv[3];
-
 	bookeepingCode();
 
 	int status;

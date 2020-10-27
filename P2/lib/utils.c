@@ -1,13 +1,14 @@
 #include "utils.h"
 
+
 char *getChunkData(int mapperID) {
 	//Message
 	struct msgBuffer message;
 	//Queue ID, not sure what it actually does
 	int mid;
-	//Queue Key
-	key_t key = 10;
-	mid = msgget(key, 0666 | IPC_CREAT);
+	//Queue Key, because globals bad
+	key_t Qkey = ftok("4061 Project 2 SS", 'S');
+	mid = msgget(Qkey, 0666 | IPC_CREAT);
 	if (mid < 0) {
 		perror("Cannot open queue.\n");
 		return NULL;
@@ -23,11 +24,12 @@ char *getChunkData(int mapperID) {
 // sends chunks of size 1024 to the mappers in RR fashion
 void sendChunkData(char *inputFile, int nMappers) {
 	struct msgBuffer message;
-	key_t key = 10;
 	int msgid;
-
+	//Hopefully this works
+	//TODO: Make sure this value matches the other Qkey
+	key_t Qkey = ftok("4061 Project 2 SS", 'S');
 	// open message queue
-	msgid = msgget(key, 0666 | IPC_CREAT);
+	msgid = msgget(Qkey, 0666 | IPC_CREAT);
 	if (msgid < 0) {
 		perror("Cannot open queue.\n");
 		exit(-1);
@@ -43,7 +45,7 @@ void sendChunkData(char *inputFile, int nMappers) {
 		    else cut off before that word and put back file      */
 		// TODO! help 
 
-		msgsnd(msgid, &message, mapperID, 0);
+		msgsnd(msgid, &message, 11, 0);
 	}
 
 	for (long i = 1; i < nMappers; i++) {
@@ -58,17 +60,17 @@ void sendChunkData(char *inputFile, int nMappers) {
 
 // hash function to divide the list of word.txt files across reducers
 //http://www.cse.yorku.ca/~oz/hash.html
-int hashFunction(char* key, int reducers){
+int hashFunction(char* Qkey, int reducers){
 	unsigned long hash = 0;
     int c;
 
-    while ((c = *key++)!='\0')
+    while ((c = *Qkey++)!='\0')
         hash = c + (hash << 6) + (hash << 16) - hash;
 
     return (hash % reducers);
 }
 
-int getInterData(char *key, int reducerID) {
+int getInterData(char *Qkey, int reducerID) {
 }
 
 void shuffle(int nMappers, int nReducers) {
