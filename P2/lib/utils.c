@@ -1,8 +1,7 @@
 #include "utils.h"
 
 int openQueue() {
-	key_t Qkey = ftok("4061 Project 2 SS", 'S');
-	int id = msgget(Qkey, 0666 | IPC_CREAT);
+	int id = msgget(ftok("4061 Project 2 SS", 'S'), 0666 | IPC_CREAT);
 	if (id < 0)
 	{
 		perror("Cannot open queue.\n");
