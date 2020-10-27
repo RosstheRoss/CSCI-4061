@@ -5,7 +5,7 @@ int openQueue() {
 	if (id < 0)
 	{
 		perror("Cannot open queue.\n");
-		return NULL;
+		return -1;
 	};
 	return id;
 }
@@ -21,7 +21,8 @@ char *getChunkData(int mapperID) {
 		struct msgBuffer ACK = {mapperID, "ACK"};
 		msgsnd(mid, &ACK, MSGSIZE, 0);
 	}
-	return message.msgText;
+	char* value = message.msgText;
+	return value;
 }
 
 // sends chunks of size 1024 to the mappers in RR fashion
@@ -30,17 +31,18 @@ void sendChunkData(char *inputFile, int nMappers) {
 	// open message queue
 	int msgid = openQueue();
 	// message.msgText = 1;
-	FILE *fptr = fopen(inputFile, "r");
-
+	int fd = open(inputFile, O_RDONLY);
 	// construct chunks of 1024 bytes
-	while(fgets(&message, chunkSize, fptr) != EOF) {
-
+	char* buf[chunkSize];
+	memset(buf, '\0', chunkSize);
+	while(read(fd, buf, chunkSize) != 0) {
+		printf("%s\n", buf);
 		/*  Go to the end of the chunk, check if final character 
 		    is a space if character is a space, do nothing
 		    else cut off before that word and put back file      */
 		// TODO! help 
 
-		msgsnd(msgid, &message, mapperID, 0);
+		msgsnd(msgid, &message, 1, 0);
 	}
 
 	for (int i = 1; i < nMappers; i++) {
@@ -88,7 +90,7 @@ void shuffle(int nMappers, int nReducers) {
 	for (int i = 1; i <= nMappers; i++) {
 		//Extra for loop traversing directory
 		
-			message.msgType = hashFunction(/* SOMETHING ,*/ nReducers);
+			//message.msgType = hashFunction(/* SOMETHING ,*/ nReducers);
 			msgsnd(id, &message, chunkSize, 0);
 	}
 
