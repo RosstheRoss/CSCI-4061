@@ -68,13 +68,12 @@ int hashFunction(char* Qkey, int reducers){
 
 int getInterData(char *Qkey, int reducerID) {
 	//make sure it work.
-	key_t Qkey = ftok("4061 Project 2 SS", 'S');
-
+	int id = openQueue();
 }
 
 void shuffle(int nMappers, int nReducers) {
 	//Once again, MAKE SURE THIS WORKS PROPERLY!
-	key_t Qkey = ftok("4061 Project 2 SS", 'S');
+	int id = openQueue();
 
 }
 
