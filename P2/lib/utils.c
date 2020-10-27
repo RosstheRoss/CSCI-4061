@@ -12,11 +12,11 @@ char *getChunkData(int mapperID) {
 		perror("Cannot open queue.\n");
 		return NULL;
 	}
-	msgrcv(mid, &message, MSGSIZE, mapperID, 0);
-	if (strcmp("END", message.msgText)) {
-		struct msgBuffer ACK = {mapperID, "ACK"};
-		msgsnd(mid, &ACK, MSGSIZE, 0);
-	}
+	msgrcv(mid, &message, sizeof(message.msgText), mapperID, 0);
+	// if (strcmp("END", message.msgText)) {
+	// 	struct msgBuffer ACK = {mapperID, "ACK"};
+	// 	msgsnd(mid, &ACK, MSGSIZE, 0);
+	// }
 	// msgctl(mid, IPC_RMID, 0);
 	return message.msgText;
 }
