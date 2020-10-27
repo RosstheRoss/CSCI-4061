@@ -66,9 +66,9 @@ int hashFunction(char* Qkey, int reducers){
 }
 
 int getInterData(char *Qkey, int reducerID) {
+	struct msgBuffer message;
 	//make sure it work.
 	int id = openQueue();
-	struct msgBuffer message;
 	msgrcv(id, &message, chunkSize, reducerID, 0);
 	Qkey = message.msgText;
 	if (strncmp("END", message.msgText, 3))
@@ -82,8 +82,15 @@ int getInterData(char *Qkey, int reducerID) {
 }
 
 void shuffle(int nMappers, int nReducers) {
+	struct msgBuffer message;
 	//Once again, MAKE SURE THIS WORKS PROPERLY!
 	int id = openQueue();
+	for (int i = 1; i <= nMappers; i++) {
+		//Extra for loop traversing directory
+		
+			message.msgType = hashFunction(/* SOMETHING */, nReducers);
+			msgsnd(id, &message, chunkSize, 0);
+	}
 
 }
 
