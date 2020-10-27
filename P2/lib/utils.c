@@ -88,7 +88,7 @@ void shuffle(int nMappers, int nReducers) {
 	for (int i = 1; i <= nMappers; i++) {
 		//Extra for loop traversing directory
 		
-			message.msgType = hashFunction(/* SOMETHING */, nReducers);
+			message.msgType = hashFunction(/* SOMETHING ,*/ nReducers);
 			msgsnd(id, &message, chunkSize, 0);
 	}
 
