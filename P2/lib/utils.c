@@ -1,19 +1,23 @@
 #include "utils.h"
 
+int openQueue() {
+	key_t Qkey = ftok("4061 Project 2 SS", 'S');
+	int id = msgget(Qkey, 0666 | IPC_CREAT);
+	if (id < 0)
+	{
+		perror("Cannot open queue.\n");
+		return NULL;
+	};
+	return id;
+}
 
 char *getChunkData(int mapperID) {
 	//Message
 	struct msgBuffer message;
-	//Queue ID, not sure what it actually does
-	int mid;
-	//Queue Key, because globals bad
-	key_t Qkey = ftok("4061 Project 2 SS", 'S');
-	mid = msgget(Qkey, 0666 | IPC_CREAT);
-	if (mid < 0) {
-		perror("Cannot open queue.\n");
-		return NULL;
-	}
+	//Queue ID
+	int mid = openQueue();
 	msgrcv(mid, &message, sizeof(message.msgText), mapperID, 0);
+	/*IMPLEMENT END AND ACK SOON*/
 	// if (strcmp("END", message.msgText)) {
 	// 	struct msgBuffer ACK = {mapperID, "ACK"};
 	// 	msgsnd(mid, &ACK, MSGSIZE, 0);
@@ -24,16 +28,8 @@ char *getChunkData(int mapperID) {
 // sends chunks of size 1024 to the mappers in RR fashion
 void sendChunkData(char *inputFile, int nMappers) {
 	struct msgBuffer message;
-	int msgid;
-	//Hopefully this works
-	//TODO: Make sure this value matches the other Qkey
-	key_t Qkey = ftok("4061 Project 2 SS", 'S');
 	// open message queue
-	msgid = msgget(Qkey, 0666 | IPC_CREAT);
-	if (msgid < 0) {
-		perror("Cannot open queue.\n");
-		exit(-1);
-	}
+	int msgid = openQueue();
 	// message.msgText = 1;
 	FILE *fptr = fopen(inputFile, "r");
 
@@ -48,7 +44,7 @@ void sendChunkData(char *inputFile, int nMappers) {
 		msgsnd(msgid, &message, 11, 0);
 	}
 
-	for (long i = 1; i < nMappers; i++) {
+	for (int i = 1; i < nMappers; i++) {
 		struct msgBuffer END = {i, "END"};
 		msgsnd(msgid, &END, MSGSIZE, 0);
 
@@ -71,9 +67,15 @@ int hashFunction(char* Qkey, int reducers){
 }
 
 int getInterData(char *Qkey, int reducerID) {
+	//make sure it work.
+	key_t Qkey = ftok("4061 Project 2 SS", 'S');
+
 }
 
 void shuffle(int nMappers, int nReducers) {
+	//Once again, MAKE SURE THIS WORKS PROPERLY!
+	key_t Qkey = ftok("4061 Project 2 SS", 'S');
+
 }
 
 // check if the character is valid for a word

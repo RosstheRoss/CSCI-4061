@@ -21,6 +21,8 @@ struct msgBuffer {
     long msgType;
     char msgText[MSGSIZE];
 };
+//Open Queue as a function because writing this once is probably better than four times.
+int openQueue();
 
 // mapper side
 int validChar(char c);
