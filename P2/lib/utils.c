@@ -17,10 +17,10 @@ char *getChunkData(int mapperID) {
 	int mid = openQueue();
 	msgrcv(mid, &message, sizeof(message.msgText), mapperID, 0);
 	/*IMPLEMENT END AND ACK SOON*/
-	// if (strcmp("END", message.msgText)) {
-	// 	struct msgBuffer ACK = {mapperID, "ACK"};
-	// 	msgsnd(mid, &ACK, MSGSIZE, 0);
-	// }
+	if (strncmp("END", message.msgText, 3)) {
+		struct msgBuffer ACK = {mapperID, "ACK"};
+		msgsnd(mid, &ACK, MSGSIZE, 0);
+	}
 	return message.msgText;
 }
 
@@ -40,7 +40,7 @@ void sendChunkData(char *inputFile, int nMappers) {
 		    else cut off before that word and put back file      */
 		// TODO! help 
 
-		msgsnd(msgid, &message, 11, 0);
+		msgsnd(msgid, &message, mapperID, 0);
 	}
 
 	for (int i = 1; i < nMappers; i++) {
@@ -68,6 +68,17 @@ int hashFunction(char* Qkey, int reducers){
 int getInterData(char *Qkey, int reducerID) {
 	//make sure it work.
 	int id = openQueue();
+	struct msgBuffer message;
+	msgrcv(id, &message, chunkSize, reducerID, 0);
+	Qkey = message.msgText;
+	if (strncmp("END", message.msgText, 3))
+	{
+		struct msgBuffer ACK = {reducerID, "ACK"};
+		msgsnd(id, &ACK, MSGSIZE, 0);
+		return 0;
+	} else {
+		return 1;
+	}
 }
 
 void shuffle(int nMappers, int nReducers) {
