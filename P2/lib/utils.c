@@ -11,6 +11,7 @@ int openQueue() {
 }
 
 char *getChunkData(int mapperID) {
+	printf("GETTING CHUNK DATA\n");
 	//Message
 	struct msgBuffer message;
 	//Queue ID
@@ -20,6 +21,7 @@ char *getChunkData(int mapperID) {
 	if (strncmp("END", message.msgText, 3)) {
 		struct msgBuffer ACK = {mapperID, "ACK"};
 		msgsnd(mid, &ACK, MSGSIZE, 0);
+		return NULL;
 	}
 	char* value = message.msgText;
 	return value;
@@ -27,22 +29,26 @@ char *getChunkData(int mapperID) {
 
 // sends chunks of size 1024 to the mappers in RR fashion
 void sendChunkData(char *inputFile, int nMappers) {
+	printf("SENDING CHUNK DATA\n");
 	struct msgBuffer message;
 	// open message queue
 	int msgid = openQueue();
+	int map = 1;
 	// message.msgText = 1;
 	int fd = open(inputFile, O_RDONLY);
 	// construct chunks of 1024 bytes
-	char* buf[chunkSize];
-	memset(buf, '\0', chunkSize);
-	while(read(fd, buf, chunkSize) != 0) {
-		printf("%s\n", buf);
+	memset(message.msgText, '\0', MSGSIZE);
+	while(read(fd, message.msgText, chunkSize) != 0) {
+		printf("%s\n", message.msgText);
 		/*  Go to the end of the chunk, check if final character 
 		    is a space if character is a space, do nothing
 		    else cut off before that word and put back file      */
 		// TODO! help 
-
-		msgsnd(msgid, &message, 1, 0);
+		message.msgType = map++;
+		//THIS IS DEBUG, NOT ACTUALLY FUNCTIONAL
+		msgsnd(msgid, &message, map, 0);
+		if (map > nMappers)
+			map = 1;
 	}
 
 	for (int i = 1; i < nMappers; i++) {
