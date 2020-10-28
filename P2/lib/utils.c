@@ -80,12 +80,13 @@ int getInterData(char *Qkey, int reducerID) {
 	int id = openQueue();
 	msgrcv(id, &message, chunkSize, reducerID, 0);
 	Qkey = message.msgText;
-	if (strncmp("END", message.msgText, 3))
-	{
-		return 0;
-	} else {
-		return 1;
-	}
+	return strncmp("END", message.msgText, 3);
+	// if (strncmp("END", message.msgText, 3))
+	// {
+	// 	return 0;
+	// } else {
+	// 	return 1;
+	// }
 }
 
 void shuffle(int nMappers, int nReducers) {
