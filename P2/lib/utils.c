@@ -2,12 +2,19 @@
 
 int openQueue() {
 	int id = msgget(ftok("4061 Project 2 SS", 'S'), 0666 | IPC_CREAT);
-	if (id < 0)
-	{
+	if (id < 0) {
 		perror("Cannot open queue.\n");
 		return -1;
-	};
+	}
 	return id;
+}
+void closeQueue() {
+	int msgid = msgget(ftok("4061 Project 2 SS", 'S'), 0666);
+	if (msgid < 0) {
+		perror("Cannot open queue. It may already exist.\n");
+		exit(-1);
+	}
+	msgctl(msgid, IPC_RMID, NULL);
 }
 
 char *getChunkData(int mapperID) {
@@ -19,8 +26,8 @@ char *getChunkData(int mapperID) {
 	msgrcv(mid, &message, sizeof(message.msgText), mapperID, 0);
 	/*IMPLEMENT END AND ACK SOON*/
 	if (strncmp("END", message.msgText, 3)) {
-		struct msgBuffer ACK = {mapperID, "ACK"};
-		msgsnd(mid, &ACK, MSGSIZE, 0);
+		// struct msgBuffer ACK = {mapperID, "ACK"};
+		// msgsnd(mid, &ACK, MSGSIZE, 0);
 		return NULL;
 	}
 	char* value = message.msgText;
@@ -39,13 +46,13 @@ void sendChunkData(char *inputFile, int nMappers) {
 	// construct chunks of 1024 bytes
 	memset(message.msgText, '\0', MSGSIZE);
 	while(read(fd, message.msgText, chunkSize) != 0) {
-		printf("%s\n", message.msgText);
+		// printf("%s\n", message.msgText);
 		/*  Go to the end of the chunk, check if final character 
 		    is a space if character is a space, do nothing
 		    else cut off before that word and put back file      */
 		// TODO! help 
 		message.msgType = map++;
-		//THIS IS DEBUG, NOT ACTUALLY FUNCTIONAL
+		//THIS IS DEBUG, NOT ACTUALLY FUNCTIONAL (like at all)
 		msgsnd(msgid, &message, map, 0);
 		if (map > nMappers)
 			map = 1;
@@ -56,7 +63,7 @@ void sendChunkData(char *inputFile, int nMappers) {
 		msgsnd(msgid, &END, MSGSIZE, 0);
 
 		// TODO! does this need to be in another loop or is blocking good enough?
-		msgrcv(msgid, &message, MSGSIZE, i, 0);
+		// msgrcv(msgid, &message, MSGSIZE, i, 0);
 	}
 
 }
@@ -81,8 +88,8 @@ int getInterData(char *Qkey, int reducerID) {
 	Qkey = message.msgText;
 	if (strncmp("END", message.msgText, 3))
 	{
-		struct msgBuffer ACK = {reducerID, "ACK"};
-		msgsnd(id, &ACK, MSGSIZE, 0);
+		// struct msgBuffer ACK = {reducerID, "ACK"};
+		// msgsnd(id, &ACK, MSGSIZE, 0);
 		return 0;
 	} else {
 		return 1;
