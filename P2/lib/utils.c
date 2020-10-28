@@ -45,7 +45,7 @@ void sendChunkData(char *inputFile, int nMappers) {
 		    else cut off before that word and put back file      */
 		// TODO! help 
 		message.msgType = map++;
-		//THIS IS DEBUG, NOT ACTUALLY FUNCTIONAL
+		//THIS IS DEBUG, NOT ACTUALLY FUNCTIONAL (like at all)
 		msgsnd(msgid, &message, map, 0);
 		if (map > nMappers)
 			map = 1;
