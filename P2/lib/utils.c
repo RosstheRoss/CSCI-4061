@@ -46,7 +46,7 @@ void sendChunkData(char *inputFile, int nMappers) {
 	// construct chunks of 1024 bytes
 	memset(message.msgText, '\0', MSGSIZE);
 	while(read(fd, message.msgText, chunkSize) != 0) {
-		printf("%s\n", message.msgText);
+		// printf("%s\n", message.msgText);
 		/*  Go to the end of the chunk, check if final character 
 		    is a space if character is a space, do nothing
 		    else cut off before that word and put back file      */
