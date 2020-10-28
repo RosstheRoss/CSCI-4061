@@ -95,7 +95,7 @@ void shuffle(int nMappers, int nReducers) {
 	int id = openQueue();
 	for (int i = 1; i <= nMappers; i++) {
 		//Extra for loop traversing directory
-		
+		//TODO: Actually traverse directory
 			//message.msgType = hashFunction(/* SOMETHING ,*/ nReducers);
 			msgsnd(id, &message, chunkSize, 0);
 	}
