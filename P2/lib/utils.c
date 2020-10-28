@@ -56,7 +56,7 @@ void sendChunkData(char *inputFile, int nMappers) {
 		msgsnd(msgid, &END, MSGSIZE, 0);
 
 		// TODO! does this need to be in another loop or is blocking good enough?
-		msgrcv(msgid, &message, MSGSIZE, i, 0);
+		// msgrcv(msgid, &message, MSGSIZE, i, 0);
 	}
 
 }
