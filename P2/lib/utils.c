@@ -24,10 +24,7 @@ char *getChunkData(int mapperID) {
 	//Queue ID
 	int mid = openQueue();
 	msgrcv(mid, &message, sizeof(message.msgText), mapperID, 0);
-	/*IMPLEMENT END AND ACK SOON*/
 	if (strncmp("END", message.msgText, 3)) {
-		// struct msgBuffer ACK = {mapperID, "ACK"};
-		// msgsnd(mid, &ACK, MSGSIZE, 0);
 		return NULL;
 	}
 	char* value = message.msgText;
@@ -61,9 +58,6 @@ void sendChunkData(char *inputFile, int nMappers) {
 	for (int i = 1; i < nMappers; i++) {
 		struct msgBuffer END = {i, "END"};
 		msgsnd(msgid, &END, MSGSIZE, 0);
-
-		// TODO! does this need to be in another loop or is blocking good enough?
-		// msgrcv(msgid, &message, MSGSIZE, i, 0);
 	}
 
 }
@@ -88,8 +82,6 @@ int getInterData(char *Qkey, int reducerID) {
 	Qkey = message.msgText;
 	if (strncmp("END", message.msgText, 3))
 	{
-		// struct msgBuffer ACK = {reducerID, "ACK"};
-		// msgsnd(id, &ACK, MSGSIZE, 0);
 		return 0;
 	} else {
 		return 1;
