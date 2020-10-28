@@ -23,7 +23,9 @@ struct msgBuffer {
 };
 //Open Queue as a function because writing this once is probably better than four times.
 //Hopefully it works properly.
+
 int openQueue();
+void closeQueue();
 
 // mapper side
 int validChar(char c);

@@ -2,12 +2,19 @@
 
 int openQueue() {
 	int id = msgget(ftok("4061 Project 2 SS", 'S'), 0666 | IPC_CREAT);
-	if (id < 0)
-	{
+	if (id < 0) {
 		perror("Cannot open queue.\n");
 		return -1;
-	};
+	}
 	return id;
+}
+void closeQueue() {
+	int msgid = msgget(ftok("4061 Project 2 SS", 'S'), 0666);
+	if (msgid < 0) {
+		perror("Cannot open queue. It may already exist.\n");
+		exit(-1);
+	}
+	msgctl(msgid, IPC_RMID, NULL);
 }
 
 char *getChunkData(int mapperID) {
