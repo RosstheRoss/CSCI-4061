@@ -19,8 +19,8 @@ char *getChunkData(int mapperID) {
 	msgrcv(mid, &message, sizeof(message.msgText), mapperID, 0);
 	/*IMPLEMENT END AND ACK SOON*/
 	if (strncmp("END", message.msgText, 3)) {
-		struct msgBuffer ACK = {mapperID, "ACK"};
-		msgsnd(mid, &ACK, MSGSIZE, 0);
+		// struct msgBuffer ACK = {mapperID, "ACK"};
+		// msgsnd(mid, &ACK, MSGSIZE, 0);
 		return NULL;
 	}
 	char* value = message.msgText;
@@ -81,8 +81,8 @@ int getInterData(char *Qkey, int reducerID) {
 	Qkey = message.msgText;
 	if (strncmp("END", message.msgText, 3))
 	{
-		struct msgBuffer ACK = {reducerID, "ACK"};
-		msgsnd(id, &ACK, MSGSIZE, 0);
+		// struct msgBuffer ACK = {reducerID, "ACK"};
+		// msgsnd(id, &ACK, MSGSIZE, 0);
 		return 0;
 	} else {
 		return 1;
