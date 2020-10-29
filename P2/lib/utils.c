@@ -46,8 +46,19 @@ void sendChunkData(char *inputFile, int nMappers) {
 		// printf("%s\n", message.msgText);
 		/*  Go to the end of the chunk, check if final character 
 		    is a space if character is a space, do nothing
-		    else cut off before that word and put back file      */
+		    else cut off before that word and put back file.
+			
+			Maybe copy message.msgText into a new array, do the
+			backwards iteration, and then replace message.msgText
+			with the temp array? Or something?       */
+			
 		// TODO! help 
+
+		// int i = 1023;
+		// while(message.msgText[i] != ' ') {
+		// 	message.msgText 
+		// }
+
 		message.msgType = map++;
 		//THIS IS DEBUG, NOT ACTUALLY FUNCTIONAL (like at all)
 		msgsnd(msgid, &message, map, 0);
