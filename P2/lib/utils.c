@@ -7,10 +7,17 @@ int closeQueue(int id) {
 	return msgctl(id, IPC_RMID, NULL);
 }
 
+struct msgBuffer makeMessage() {
+	struct msgBuffer temp;
+	memset(temp.msgText, '\0', MSGSIZE);
+	temp.msgType = 0;
+	return temp;
+}
+
 char *getChunkData(int mapperID) {
 	printf("GETTING CHUNK DATA\n");
 	//Message
-	struct msgBuffer message;
+	struct msgBuffer message = makeMessage();
 	//Queue ID
 	int mid = openQueue("map");
 	msgrcv(mid, &message, sizeof(message.msgText), mapperID, 0);
@@ -24,14 +31,12 @@ char *getChunkData(int mapperID) {
 // sends chunks of size 1024 to the mappers in RR fashion
 void sendChunkData(char *inputFile, int nMappers) {
 	printf("SENDING CHUNK DATA\n");
-	struct msgBuffer message;
+	struct msgBuffer message = makeMessage();
 	// open message queue
 	int msgid = openQueue("map");
 	int map = 1;
-	// message.msgText = 1;
 	int fd = open(inputFile, O_RDONLY);
 	// construct chunks of 1024 bytes
-	memset(message.msgText, '\0', MSGSIZE);
 	while(read(fd, message.msgText, chunkSize) != 0) {
 		// printf("%s\n", message.msgText);
 		/*  Go to the end of the chunk, check if final character 
@@ -76,7 +81,7 @@ int hashFunction(char* Qkey, int reducers){
 }
 
 int getInterData(char *Qkey, int reducerID) {
-	struct msgBuffer message;
+	struct msgBuffer message= makeMessage();
 	//make sure it work.
 	int id = openQueue("reduce");
 	msgrcv(id, &message, chunkSize, reducerID, 0);
@@ -91,7 +96,7 @@ int getInterData(char *Qkey, int reducerID) {
 }
 
 void shuffle(int nMappers, int nReducers) {
-	struct msgBuffer message;
+	struct msgBuffer message = makeMessage();
 	//Once again, MAKE SURE THIS WORKS PROPERLY!
 	int id = openQueue("reduce");
 	for (int i = 1; i <= nMappers; i++) {

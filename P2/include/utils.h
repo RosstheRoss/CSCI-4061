@@ -26,7 +26,7 @@ struct msgBuffer {
 
 int openQueue(char* path);
 int closeQueue(int id);
-
+struct msgBuffer makeMessage();
 // mapper side
 int validChar(char c);
 char *getWord(char *chunk, int *i);
