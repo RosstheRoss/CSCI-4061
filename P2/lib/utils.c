@@ -46,6 +46,7 @@ void sendChunkData(char *inputFile, int nMappers) {
 			Maybe copy message.msgText into a new array, do the
 			backwards iteration, and then replace message.msgText
 			with the temp array? Or something?       */
+			//fseek()
 			
 		// TODO! help 
 
@@ -54,11 +55,9 @@ void sendChunkData(char *inputFile, int nMappers) {
 		// 	message.msgText 
 		// }
 
-		message.msgType = map++;
+		message.msgType = (map++ % nMappers) + 1 ;
 		//THIS IS DEBUG, NOT ACTUALLY FUNCTIONAL (like at all)
 		msgsnd(msgid, &message, map, 0);
-		if (map > nMappers)
-			map = 1;
 	}
 
 	for (int i = 1; i < nMappers; i++) {
