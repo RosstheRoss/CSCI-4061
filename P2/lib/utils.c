@@ -32,6 +32,7 @@ char *getChunkData(int mapperID) {
 
 	// DEBUG! malloc a buffer/return 
 	char* value = malloc(1024); // chunkSize or MSGSIZE?
+	strcpy(value, message.msgText);
 	return value;
 	// Free memory outside of getChunkData?
 
@@ -93,9 +94,10 @@ int getInterData(char *Qkey, int reducerID) {
 	int id = openQueue();
 	msgrcv(id, &message, MSGSIZE, reducerID, 0);
 	// printf("INTER DATA: %s\n", message.msgText);
-	*Qkey = *message.msgText;
+	// *Qkey = *message.msgText;
+	strcpy(Qkey, message.msgText);
 	printf("INTER DATA: %s\n", Qkey);
-	return (strncmp("END", message.msgText, 3) == 0);
+	return (strncmp("END", message.msgText, 3) != 0);
 }
 
 void shuffle(int nMappers, int nReducers) {
@@ -103,11 +105,11 @@ void shuffle(int nMappers, int nReducers) {
 	struct msgBuffer message = makeMessage();
 	//Once again, MAKE SURE THIS WORKS PROPERLY!
 	char path[50];
-	getcwd(path, 50);
+	// getcwd(path, 50);
 	int id = openQueue();
 	for (int i = 1; i <= nMappers; i++) {
 		char newpath[100];
-		sprintf(newpath, "%s/output/MapOut/Map_%d", path, i);
+		sprintf(newpath, "output/MapOut/Map_%d", i); // Removed /, add to current dir
 		DIR *dir = opendir(newpath);
 		struct dirent* entry;
 		while ((entry = readdir(dir)) != NULL) {
