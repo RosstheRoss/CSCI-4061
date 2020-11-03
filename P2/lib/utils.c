@@ -92,6 +92,7 @@ int getInterData(char *Qkey, int reducerID) {
 	//DEBUG! make sure it work.
 	// How do we traverse the directory if we're not given it as an arg?
 	int id = openQueue();
+	//Likes to hang
 	msgrcv(id, &message, MSGSIZE, reducerID, 0);
 	// printf("INTER DATA: %s\n", message.msgText);
 	// *Qkey = *message.msgText;
