@@ -33,7 +33,7 @@ char *getChunkData(int mapperID) {
 	// DEBUG! malloc a buffer/return 
 	char* value = malloc(1024); // chunkSize or MSGSIZE?
 	return value;
-	// Free memory
+	// Free memory outside of getChunkData?
 
 	// printf("%s\n", message.msgText);
 	//printf("RECEIVED CHUNK:%s\nRECEIVED VALUE:%ld\n", value, message.msgType);
