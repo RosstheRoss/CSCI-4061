@@ -21,15 +21,15 @@ char *getChunkData(int mapperID) {
 	struct msgBuffer message = makeMessage();
 	//Queue ID
 	int mid = openQueue();
-	 printf("MAPPER ID:%d\n", mapperID);
+	//printf("MAPPER ID:%d\n", mapperID);
 	msgrcv(mid, &message, MSGSIZE, mapperID, 0);
-	// printf("\n%s\n", message.msgText);
+	printf("\n%s\n", message.msgText);
 	// printf("%d\n", strncmp("END", message.msgText, 3));
 	if (strncmp("END", message.msgText, 4) == 0)
 		return NULL;
 	char* value = message.msgText;
 	// printf("%s\n", message.msgText);
-	printf("RECEIVED CHUNK:%s\nRECEIVED VALUE:%ld\n", value, message.msgType);
+	//printf("RECEIVED CHUNK:%s\nRECEIVED VALUE:%ld\n", value, message.msgType);
 	return value;
 	//return &(message.msgText);
 }
@@ -53,7 +53,7 @@ void sendChunkData(char *inputFile, int nMappers) {
 
 		fseek(file, (i - 1023), SEEK_CUR);
 		message.msgType = (map++ % nMappers) + 1;
-		printf("SENT CHUNK: %s\nSENT CHUNK MAPPER: %ld\n",message.msgText, message.msgType);
+		//printf("SENT CHUNK: %s\nSENT CHUNK MAPPER: %ld\n",message.msgText, message.msgType);
 		msgsnd(msgid, &message, MSGSIZE, 0);
 	}
 
