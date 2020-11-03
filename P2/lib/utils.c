@@ -46,6 +46,8 @@ void sendChunkData(char *inputFile, int nMappers) {
 	struct msgBuffer message = makeMessage();
 	// open message queue
 	int msgid = openQueue();
+	closeQueue(msgid);
+	msgid = openQueue();
 	// DEBUG! Remove if already exists when opening queue for the first time
 	int map = 0;
 	FILE* file = fopen(inputFile, "r");
