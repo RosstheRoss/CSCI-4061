@@ -95,7 +95,7 @@ void shuffle(int nMappers, int nReducers) {
 	getcwd(path, 100);
 	int id = openQueue("reduce");
 	for (int i = 1; i <= nMappers; i++) {
-		char newpath[100];
+		char newpath[200];
 		sprintf(newpath, "%s/output/MapOut/Map_%d", path, i);
 		printf("%s\n", newpath);
 		DIR *dir = opendir(newpath);
@@ -103,10 +103,9 @@ void shuffle(int nMappers, int nReducers) {
 		while ((entry = readdir(dir)) != NULL) {
 			if (!strcmp(".", entry->d_name) || !strcmp("..", entry->d_name))
 				continue;
-
-
-				//message.msgType = hashFunction(/* SOMETHING ,*/ nReducers);
-				msgsnd(id, &message, chunkSize, 0);
+			message.msgType = hashFunction(entry -> d_name, nReducers);
+			printf("%ld\n", message.msgType);
+			msgsnd(id, &message, chunkSize, 0);
 			}
 		closedir(dir);
 	}
