@@ -38,17 +38,6 @@ void sendChunkData(char *inputFile, int nMappers) {
 	FILE* file = fopen(inputFile, "r");
 	// construct chunks of 1024 bytes
 	while(fgets(message.msgText, chunkSize + 1, file) != NULL) {
-		/*  Go to the end of the chunk, check if final character 
-		    is a space if character is a space, do nothing
-		    else cut off before that word and put back file.
-			
-			Maybe copy message.msgText into a new array, do the
-			backwards iteration, and then replace message.msgText
-			with the temp array? Or something?       */
-		//fseek()?? (HIGH LEVEL)
-		//https://www.tutorialspoint.com/c_standard_library/c_function_fseek.htm
-		//lseek()?? (LOW LEVEL)
-		//http://crasseux.com/books/ctutorial/Finding-file-positions-at-a-low-level.html
 
 		// TODO! help 
 		int i = 1023;
