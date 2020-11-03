@@ -39,18 +39,18 @@ void sendChunkData(char *inputFile, int nMappers) {
 	// construct chunks of 1024 bytes
 	while(fgets(message.msgText, chunkSize + 1, file) != NULL) {
 
-		// TODO! help 
 		int i = 1023;
 		while((validChar(message.msgText[i]) )) {
 			message.msgText[i] = '\0';
 			i--;
 		}
 		printf("%d\n", validChar(message.msgText[i]));
-		printf("test\n");
+		// DEBUG!
+
 		fseek(file, (i - 1023), SEEK_CUR);
 		printf("%s\n", message.msgText);
 		message.msgType = (map++ % nMappers) + 1 ;
-		//THIS IS DEBUG, NOT ACTUALLY FUNCTIONAL (like at all)
+		//DEBUG! NOT ACTUALLY FUNCTIONAL (like at all)
 		msgsnd(msgid, &message, map, 0);
 	}
 
