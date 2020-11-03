@@ -29,7 +29,7 @@ char *getChunkData(int mapperID) {
 		return NULL;
 	char* value = message.msgText;
 	// printf("%s\n", message.msgText);
-	// printf("%s\n", value);
+	printf("RECEIVED CHUNK:%s\n", value);
 	return value;
 	//return &(message.msgText);
 }
@@ -53,7 +53,7 @@ void sendChunkData(char *inputFile, int nMappers) {
 
 		fseek(file, (i - 1023), SEEK_CUR);
 		message.msgType = (map++ % nMappers) + 1;
-		// printf("%s\n\n",message.msgText);
+		printf("SENT CHUNK: %s\n",message.msgText);
 		msgsnd(msgid, &message, MSGSIZE, 0);
 	}
 
@@ -81,10 +81,10 @@ int getInterData(char *Qkey, int reducerID) {
 	//DEBUG! make sure it work.
 	// How do we traverse the directory if we're not given it as an arg?
 	int id = openQueue();
-	msgrcv(id, &message, chunkSize, reducerID, 0);
-	printf("\n%s\n", message.msgText);
+	msgrcv(id, &message, MSGSIZE, reducerID, 0);
+	// printf("INTER DATA: %s\n", message.msgText);
 	*Qkey = *message.msgText;
-	// printf("%s\n", Qkey);
+	printf("INTER DATA: %s\n", Qkey);
 	return (strncmp("END", message.msgText, 3) == 0);
 }
 
@@ -105,9 +105,9 @@ void shuffle(int nMappers, int nReducers) {
 				continue;
 			sprintf(message.msgText, "%s/%s", newpath, entry -> d_name);
 			message.msgType = hashFunction(entry -> d_name, nReducers);
-			printf("%s\n", message.msgText);
+			printf("SENT SHUFFLE:%s\n", message.msgText);
 			printf("%ld\n", message.msgType);
-			msgsnd(id, &message, chunkSize, 0);
+			msgsnd(id, &message, MSGSIZE, 0);
 			}
 		closedir(dir);
 	}
