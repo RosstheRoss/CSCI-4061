@@ -25,7 +25,7 @@ char *getChunkData(int mapperID) {
 	msgrcv(mid, &message, MSGSIZE, mapperID, 0);
 	printf("\n%s\n", message.msgText);
 	// printf("%d\n", strncmp("END", message.msgText, 3));
-	if (strncmp("END", message.msgText, 4) == 0)
+	if (strncmp("END", message.msgText, 3) == 0)
 		return NULL;
 	// char* value = message.msgText;
 	// return value;
