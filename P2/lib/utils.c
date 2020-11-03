@@ -27,12 +27,12 @@ char *getChunkData(int mapperID) {
 	// printf("%d\n", strncmp("END", message.msgText, 3));
 	if (strncmp("END", message.msgText, 4) == 0)
 		return NULL;
-	char* value = message.msgText;
-	return value;
+	// char* value = message.msgText;
+	// return value;
 
 	// DEBUG! malloc a buffer/return 
-	// char* value = malloc(1024); // chunkSize or MSGSIZE?
-	// return value;
+	char* value = malloc(1024); // chunkSize or MSGSIZE?
+	return value;
 	// Free memory
 
 	// printf("%s\n", message.msgText);
