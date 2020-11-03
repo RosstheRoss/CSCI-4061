@@ -15,17 +15,23 @@ struct msgBuffer makeMessage() {
 }
 
 char *getChunkData(int mapperID) {
-	printf("GETTING CHUNK DATA\n");
 	//Message
 	struct msgBuffer message = makeMessage();
 	//Queue ID
 	int mid = openQueue("map");
+	printf("%d\n", mapperID);
 	msgrcv(mid, &message, sizeof(message.msgText), mapperID, 0);
-	if (strncmp("END", message.msgText, 3)) {
+	// printf("\n%s\n", message.msgText);
+	// printf("%d\n", strncmp("END", message.msgText, 3));
+	if (!strncmp("END", message.msgText, 3))
+	{
+		printf("END\n");
 		return NULL;
 	}
 	char* value = message.msgText;
-	return value;
+	printf("%s\n", message.msgText);
+	// return value;
+	return &(message.msgText);
 }
 
 // sends chunks of size 1024 to the mappers in RR fashion
@@ -53,7 +59,7 @@ void sendChunkData(char *inputFile, int nMappers) {
 		msgsnd(msgid, &message, map, 0);
 	}
 
-	for (int i = 1; i < nMappers; i++) {
+	for (int i = 1; i <= nMappers; i++) {
 		struct msgBuffer END = {i, "END"};
 		msgsnd(msgid, &END, MSGSIZE, 0);
 	}
@@ -79,6 +85,7 @@ int getInterData(char *Qkey, int reducerID) {
 	int id = openQueue("reduce");
 	msgrcv(id, &message, chunkSize, reducerID, 0);
 	*Qkey = *message.msgText;
+	printf("%s\n", Qkey);
 	return abs(strncmp("END", message.msgText, 3));
 	// if (strncmp("END", message.msgText, 3))
 	// {
