@@ -52,7 +52,7 @@ void sendChunkData(char *inputFile, int nMappers) {
 		fseek(file, (i - 1023), SEEK_CUR);
 		message.msgType = (map++ % nMappers) + 1;
 		// printf("%s\n\n",message.msgText);
-		msgsnd(msgid, &message, map, 0);
+		msgsnd(msgid, &message, MSGSIZE, 0);
 	}
 
 	for (int i = 1; i <= nMappers; i++) {
