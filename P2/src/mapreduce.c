@@ -77,7 +77,6 @@ int main(int argc, char *argv[]) {
 	// wait for all children to complete execution
     while (wait(&status) > 0);
 
-	closeQueue(openQueue("map"));
-	closeQueue(openQueue("reduce"));
+	closeQueue(openQueue());
 	return 0;
 }

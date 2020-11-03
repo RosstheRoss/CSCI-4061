@@ -23,13 +23,13 @@ char *getChunkData(int mapperID) {
 	int mid = openQueue("map");
 	// printf("%d\n", mapperID);
 	msgrcv(mid, &message, MSGSIZE, mapperID, 0);
-	printf("\n%s\n", message.msgText);
+	// printf("\n%s\n", message.msgText);
 	// printf("%d\n", strncmp("END", message.msgText, 3));
 	if (strncmp("END", message.msgText, 3) == 0)
 		return NULL;
 	char* value = message.msgText;
 	// printf("%s\n", message.msgText);
-	printf("%s\n", value);
+	// printf("%s\n", value);
 	return value;
 	//return &(message.msgText);
 }
