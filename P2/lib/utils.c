@@ -38,7 +38,6 @@ void sendChunkData(char *inputFile, int nMappers) {
 	int fd = open(inputFile, O_RDONLY);
 	// construct chunks of 1024 bytes
 	while(read(fd, message.msgText, chunkSize) != 0) {
-		// printf("%s\n", message.msgText);
 		/*  Go to the end of the chunk, check if final character 
 		    is a space if character is a space, do nothing
 		    else cut off before that word and put back file.
@@ -46,16 +45,18 @@ void sendChunkData(char *inputFile, int nMappers) {
 			Maybe copy message.msgText into a new array, do the
 			backwards iteration, and then replace message.msgText
 			with the temp array? Or something?       */
-		//fseek()??
-		//https://www.tutorialspoint.com/c_standard_library/c_function_fseek.htm
+		//lseek()?? (LOW LEVEL)
+		//http://crasseux.com/books/ctutorial/Finding-file-positions-at-a-low-level.html
 
 		// TODO! help 
 
-		// int i = 1023;
-		// while(message.msgText[i] != ' ') {
-		// 	message.msgText 
-		// }
-
+		int i = 1023;
+		while(message.msgText[i] != ' ') {
+			i--;
+			printf("%d\n", i);	
+		}
+		lseek(fd, (i - 1023), SEEK_CUR);
+		printf("%s\n", message.msgText);
 		message.msgType = (map++ % nMappers) + 1 ;
 		//THIS IS DEBUG, NOT ACTUALLY FUNCTIONAL (like at all)
 		msgsnd(msgid, &message, map, 0);
