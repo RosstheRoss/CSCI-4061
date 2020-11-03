@@ -53,8 +53,8 @@ void sendChunkData(char *inputFile, int nMappers) {
 		// TODO! help 
 		int i = 1023;
 		while(validChar(message.msgText[i])) {
-			message.msgText[i] == '\0';
-			i--;
+			message.msgText[i--] == '\0';
+			// i--;
 			// printf("%d\n", i);	
 		}
 		fseek(file, (i - 1023), SEEK_CUR);
