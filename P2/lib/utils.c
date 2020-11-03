@@ -44,13 +44,12 @@ void sendChunkData(char *inputFile, int nMappers) {
 			message.msgText[i] = '\0';
 			i--;
 		}
-		printf("%d\n", validChar(message.msgText[i]));
 		// DEBUG!
 
 		fseek(file, (i - 1023), SEEK_CUR);
-		printf("%s\n", message.msgText);
-		message.msgType = (map++ % nMappers) + 1 ;
-		//DEBUG! NOT ACTUALLY FUNCTIONAL (like at all)
+		//The first mapper sent to is 2 instead of 1.
+		//Is this a problem? Probably not.
+		message.msgType = (map++ % nMappers) + 1;
 		msgsnd(msgid, &message, map, 0);
 	}
 
