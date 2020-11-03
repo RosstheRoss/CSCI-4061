@@ -35,9 +35,9 @@ void sendChunkData(char *inputFile, int nMappers) {
 	// open message queue
 	int msgid = openQueue("map");
 	int map = 1;
-	int fd = open(inputFile, O_RDONLY);
+	FILE* file = fopen(inputFile, "r");
 	// construct chunks of 1024 bytes
-	while(read(fd, message.msgText, chunkSize) != 0) {
+	while(fgets(message.msgText, chunkSize + 1, file) != NULL) {
 		/*  Go to the end of the chunk, check if final character 
 		    is a space if character is a space, do nothing
 		    else cut off before that word and put back file.
@@ -45,18 +45,14 @@ void sendChunkData(char *inputFile, int nMappers) {
 			Maybe copy message.msgText into a new array, do the
 			backwards iteration, and then replace message.msgText
 			with the temp array? Or something?       */
-		//lseek()?? (LOW LEVEL)
-		//http://crasseux.com/books/ctutorial/Finding-file-positions-at-a-low-level.html
-
 		// TODO! help 
-
-		// int i = 1023;
-		// while(message.msgText[i] != ' ') {
-		// 	i--;
-		// 	message.msgText[i] == '\0';
-		// 	printf("%d\n", i);	
-		// }
-		// lseek(fd, (i - 1023), SEEK_CUR);
+		int i = 1023;
+		while(message.msgText[i] != ' ' || message.msgText[i] != '.') {
+			i--;
+			message.msgText[i] == '\0';
+			printf("%d\n", i);	
+		}
+		fseek(file, (i - 1023), SEEK_CUR);
 		printf("%s\n", message.msgText);
 		message.msgType = (map++ % nMappers) + 1 ;
 		//THIS IS DEBUG, NOT ACTUALLY FUNCTIONAL (like at all)
@@ -67,7 +63,7 @@ void sendChunkData(char *inputFile, int nMappers) {
 		struct msgBuffer END = {i, "END"};
 		msgsnd(msgid, &END, MSGSIZE, 0);
 	}
-
+	fclose(file);
 }
 
 // hash function to divide the list of word.txt files across reducers
