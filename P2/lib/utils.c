@@ -78,8 +78,8 @@ int getInterData(char *Qkey, int reducerID) {
 	// How do we traverse the directory if we're not given it as an arg?
 	int id = openQueue("reduce");
 	msgrcv(id, &message, chunkSize, reducerID, 0);
-	Qkey = message.msgText;
-	return strncmp("END", message.msgText, 3);
+	*Qkey = *message.msgText;
+	return abs(strncmp("END", message.msgText, 3));
 	// if (strncmp("END", message.msgText, 3))
 	// {
 	// 	return 0;
