@@ -17,7 +17,6 @@ struct msgBuffer makeMessage() {
 char *getChunkData(int mapperID) {
 	//Message
 	struct msgBuffer message = makeMessage();
-	// printf("%ld\n", message.msgType);
 	//Queue ID
 	int mid = openQueue("map");
 	// printf("%d\n", mapperID);
