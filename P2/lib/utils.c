@@ -75,7 +75,8 @@ int hashFunction(char* Qkey, int reducers){
 
 int getInterData(char *Qkey, int reducerID) {
 	struct msgBuffer message= makeMessage();
-	//make sure it work.
+	//DEBUG! make sure it work.
+	// How do we traverse the directory if we're not given it as an arg?
 	int id = openQueue("reduce");
 	msgrcv(id, &message, chunkSize, reducerID, 0);
 	Qkey = message.msgText;
