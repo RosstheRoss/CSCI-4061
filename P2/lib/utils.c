@@ -45,7 +45,7 @@ void sendChunkData(char *inputFile, int nMappers) {
 	while(fgets(message.msgText, chunkSize + 1, file) != NULL) {
 
 		int i = 1023;
-		while((validChar(message.msgText[i]))) {
+		while(validChar(message.msgText[i])) {
 			message.msgText[i] = '\0';
 			i--;
 		}
