@@ -50,12 +50,13 @@ void sendChunkData(char *inputFile, int nMappers) {
 
 		// TODO! help 
 
-		int i = 1023;
-		while(message.msgText[i] != ' ') {
-			i--;
-			printf("%d\n", i);	
-		}
-		lseek(fd, (i - 1023), SEEK_CUR);
+		// int i = 1023;
+		// while(message.msgText[i] != ' ') {
+		// 	i--;
+		// 	message.msgText[i] == '\0';
+		// 	printf("%d\n", i);	
+		// }
+		// lseek(fd, (i - 1023), SEEK_CUR);
 		printf("%s\n", message.msgText);
 		message.msgType = (map++ % nMappers) + 1 ;
 		//THIS IS DEBUG, NOT ACTUALLY FUNCTIONAL (like at all)
