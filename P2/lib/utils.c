@@ -1,7 +1,9 @@
 #include "utils.h"
 
-int openQueue(char* path) {
-	return msgget(ftok(path, 253), 0666 | IPC_CREAT);
+int openQueue() {
+	char cwd [50];
+	getcwd(cwd, 50);
+	return msgget(ftok(cwd, 4061), 0666 | IPC_CREAT);
 }
 int closeQueue(int id) {
 	return msgctl(id, IPC_RMID, NULL);
@@ -78,7 +80,7 @@ int getInterData(char *Qkey, int reducerID) {
 	struct msgBuffer message= makeMessage();
 	//DEBUG! make sure it work.
 	// How do we traverse the directory if we're not given it as an arg?
-	int id = openQueue("reduce");
+	int id = openQueue();
 	msgrcv(id, &message, chunkSize, reducerID, 0);
 	*Qkey = *message.msgText;
 	printf("%s\n", Qkey);
@@ -91,7 +93,7 @@ void shuffle(int nMappers, int nReducers) {
 	//Once again, MAKE SURE THIS WORKS PROPERLY!
 	char path[50];
 	getcwd(path, 50);
-	int id = openQueue("reduce");
+	int id = openQueue();
 	for (int i = 1; i <= nMappers; i++) {
 		char newpath[100];
 		sprintf(newpath, "%s/output/MapOut/Map_%d", path, i);
