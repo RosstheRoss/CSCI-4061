@@ -91,12 +91,19 @@ int getInterData(char *Qkey, int reducerID) {
 void shuffle(int nMappers, int nReducers) {
 	struct msgBuffer message = makeMessage();
 	//Once again, MAKE SURE THIS WORKS PROPERLY!
+	char path[100];
+	getcwd(path, 100);
 	int id = openQueue("reduce");
 	for (int i = 1; i <= nMappers; i++) {
-		//Extra for loop traversing directory
-		//TODO: Actually traverse directory
+		char newpath[100];
+		sprintf(newpath, "%s/output/MapOut/Map_%d", path, i);
+		printf("%s\n", newpath);
+		DIR *dir = opendir(newpath);
+		struct dirent* entry;
+		while ((entry = readdir(dir)) != NULL) {
 			//message.msgType = hashFunction(/* SOMETHING ,*/ nReducers);
 			msgsnd(id, &message, chunkSize, 0);
+		}	
 	}
 
 }
