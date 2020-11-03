@@ -30,8 +30,8 @@ char *getChunkData(int mapperID) {
 	}
 	char* value = message.msgText;
 	printf("%s\n", message.msgText);
-	// return value;
-	return &(message.msgText);
+	return value;
+	//return &(message.msgText);
 }
 
 // sends chunks of size 1024 to the mappers in RR fashion
