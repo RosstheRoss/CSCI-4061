@@ -40,7 +40,7 @@ void sendChunkData(char *inputFile, int nMappers) {
 	struct msgBuffer message = makeMessage();
 	// open message queue
 	int msgid = openQueue("map");
-	int map = 1;
+	int map = 0;
 	FILE* file = fopen(inputFile, "r");
 	// construct chunks of 1024 bytes
 	while(fgets(message.msgText, chunkSize + 1, file) != NULL) {
@@ -53,8 +53,6 @@ void sendChunkData(char *inputFile, int nMappers) {
 		// DEBUG!
 
 		fseek(file, (i - 1023), SEEK_CUR);
-		//The first mapper sent to is 2 instead of 1.
-		//Is this a problem? Probably not.
 		message.msgType = (map++ % nMappers) + 1;
 		printf("%s\n\n",message.msgText);
 		msgsnd(msgid, &message, map, 0);
