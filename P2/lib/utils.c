@@ -82,9 +82,10 @@ int getInterData(char *Qkey, int reducerID) {
 	// How do we traverse the directory if we're not given it as an arg?
 	int id = openQueue();
 	msgrcv(id, &message, chunkSize, reducerID, 0);
+	printf("\n%s\n", message.msgText);
 	*Qkey = *message.msgText;
-	printf("%s\n", Qkey);
-	return strncmp("END", message.msgText, 3) == 0;
+	// printf("%s\n", Qkey);
+	return (strncmp("END", message.msgText, 3) == 0);
 }
 
 void shuffle(int nMappers, int nReducers) {
