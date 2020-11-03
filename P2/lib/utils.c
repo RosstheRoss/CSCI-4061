@@ -101,11 +101,15 @@ void shuffle(int nMappers, int nReducers) {
 		DIR *dir = opendir(newpath);
 		struct dirent* entry;
 		while ((entry = readdir(dir)) != NULL) {
-			//message.msgType = hashFunction(/* SOMETHING ,*/ nReducers);
-			msgsnd(id, &message, chunkSize, 0);
-		}	
-	}
+			if (!strcmp(".", entry->d_name) || !strcmp("..", entry->d_name))
+				continue;
 
+
+				//message.msgType = hashFunction(/* SOMETHING ,*/ nReducers);
+				msgsnd(id, &message, chunkSize, 0);
+			}
+		closedir(dir);
+	}
 }
 
 // check if the character is valid for a word
