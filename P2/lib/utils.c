@@ -28,9 +28,16 @@ char *getChunkData(int mapperID) {
 	if (strncmp("END", message.msgText, 4) == 0)
 		return NULL;
 	char* value = message.msgText;
+	return value;
+
+	// DEBUG! malloc a buffer/return 
+	// char* value = malloc(1024); // chunkSize or MSGSIZE?
+	// return value;
+	// Free memory
+
 	// printf("%s\n", message.msgText);
 	//printf("RECEIVED CHUNK:%s\nRECEIVED VALUE:%ld\n", value, message.msgType);
-	return value;
+	
 	//return &(message.msgText);
 }
 
@@ -39,6 +46,7 @@ void sendChunkData(char *inputFile, int nMappers) {
 	struct msgBuffer message = makeMessage();
 	// open message queue
 	int msgid = openQueue();
+	// DEBUG! Remove if already exists when opening queue for the first time
 	int map = 0;
 	FILE* file = fopen(inputFile, "r");
 	// construct chunks of 1024 bytes
