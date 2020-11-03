@@ -36,7 +36,6 @@ char *getChunkData(int mapperID) {
 
 // sends chunks of size 1024 to the mappers in RR fashion
 void sendChunkData(char *inputFile, int nMappers) {
-	printf("SENDING CHUNK DATA\n");
 	struct msgBuffer message = makeMessage();
 	// open message queue
 	int msgid = openQueue("map");
