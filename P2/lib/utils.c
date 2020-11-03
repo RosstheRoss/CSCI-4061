@@ -21,11 +21,10 @@ char *getChunkData(int mapperID) {
 	int mid = openQueue("map");
 	printf("%d\n", mapperID);
 	msgrcv(mid, &message, chunkSize, mapperID, 0);
-	// printf("\n%s\n", message.msgText);
-	// printf("%d\n", strncmp("END", message.msgText, 3));
-	if (!strncmp("END", message.msgText, 3))
+	printf("\n%s\n", message.msgText);
+	printf("%d\n", strncmp("END", message.msgText, 3));
+	if (strncmp("END", message.msgText, 3) == 0)
 	{
-		printf("END\n");
 		return NULL;
 	}
 	char* value = message.msgText;
@@ -46,7 +45,7 @@ void sendChunkData(char *inputFile, int nMappers) {
 	while(fgets(message.msgText, chunkSize + 1, file) != NULL) {
 
 		int i = 1023;
-		while((validChar(message.msgText[i]) )) {
+		while((validChar(message.msgText[i]))) {
 			message.msgText[i] = '\0';
 			i--;
 		}
@@ -85,7 +84,7 @@ int getInterData(char *Qkey, int reducerID) {
 	int id = openQueue("reduce");
 	msgrcv(id, &message, chunkSize, reducerID, 0);
 	*Qkey = *message.msgText;
-	printf("%s\n", Qkey);
+	// printf("%s\n", Qkey);
 	return abs(strncmp("END", message.msgText, 3));
 	// if (strncmp("END", message.msgText, 3))
 	// {
