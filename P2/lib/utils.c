@@ -17,18 +17,19 @@ struct msgBuffer makeMessage() {
 char *getChunkData(int mapperID) {
 	//Message
 	struct msgBuffer message = makeMessage();
+	// printf("%ld\n", message.msgType);
 	//Queue ID
 	int mid = openQueue("map");
-	printf("%d\n", mapperID);
+	// printf("%d\n", mapperID);
 	msgrcv(mid, &message, chunkSize, mapperID, 0);
-	printf("\n%s\n", message.msgText);
-	printf("%d\n", strncmp("END", message.msgText, 3));
+	// printf("\n%s\n", message.msgText);
+	// printf("%d\n", strncmp("END", message.msgText, 3));
 	if (strncmp("END", message.msgText, 3) == 0)
 	{
 		return NULL;
 	}
 	char* value = message.msgText;
-	printf("%s\n", message.msgText);
+	// printf("%s\n", message.msgText);
 	printf("%s\n", value);
 	return value;
 	//return &(message.msgText);
@@ -55,6 +56,7 @@ void sendChunkData(char *inputFile, int nMappers) {
 		//The first mapper sent to is 2 instead of 1.
 		//Is this a problem? Probably not.
 		message.msgType = (map++ % nMappers) + 1;
+		printf("%s\n\n",message.msgText);
 		msgsnd(msgid, &message, map, 0);
 	}
 
@@ -85,13 +87,7 @@ int getInterData(char *Qkey, int reducerID) {
 	msgrcv(id, &message, chunkSize, reducerID, 0);
 	*Qkey = *message.msgText;
 	// printf("%s\n", Qkey);
-	return abs(strncmp("END", message.msgText, 3));
-	// if (strncmp("END", message.msgText, 3))
-	// {
-	// 	return 0;
-	// } else {
-	// 	return 1;
-	// }
+	return strncmp("END", message.msgText, 3) == 0;
 }
 
 void shuffle(int nMappers, int nReducers) {
