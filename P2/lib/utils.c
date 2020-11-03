@@ -20,7 +20,7 @@ char *getChunkData(int mapperID) {
 	//Queue ID
 	int mid = openQueue("map");
 	// printf("%d\n", mapperID);
-	msgrcv(mid, &message, chunkSize, mapperID, 0);
+	msgrcv(mid, &message, MSGSIZE, mapperID, 0);
 	// printf("\n%s\n", message.msgText);
 	// printf("%d\n", strncmp("END", message.msgText, 3));
 	if (strncmp("END", message.msgText, 3) == 0)
