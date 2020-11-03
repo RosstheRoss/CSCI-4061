@@ -25,9 +25,7 @@ char *getChunkData(int mapperID) {
 	// printf("\n%s\n", message.msgText);
 	// printf("%d\n", strncmp("END", message.msgText, 3));
 	if (strncmp("END", message.msgText, 3) == 0)
-	{
 		return NULL;
-	}
 	char* value = message.msgText;
 	// printf("%s\n", message.msgText);
 	// printf("%s\n", value);
