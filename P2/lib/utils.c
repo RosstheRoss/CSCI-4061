@@ -30,7 +30,7 @@ char *getChunkData(int mapperID) {
 	}
 	char* value = message.msgText;
 	// printf("%s\n", message.msgText);
-	printf("%s\n", value);
+	// printf("%s\n", value);
 	return value;
 	//return &(message.msgText);
 }
@@ -54,7 +54,7 @@ void sendChunkData(char *inputFile, int nMappers) {
 
 		fseek(file, (i - 1023), SEEK_CUR);
 		message.msgType = (map++ % nMappers) + 1;
-		printf("%s\n\n",message.msgText);
+		// printf("%s\n\n",message.msgText);
 		msgsnd(msgid, &message, map, 0);
 	}
 
@@ -84,7 +84,7 @@ int getInterData(char *Qkey, int reducerID) {
 	int id = openQueue("reduce");
 	msgrcv(id, &message, chunkSize, reducerID, 0);
 	*Qkey = *message.msgText;
-	// printf("%s\n", Qkey);
+	printf("%s\n", Qkey);
 	return strncmp("END", message.msgText, 3) == 0;
 }
 
