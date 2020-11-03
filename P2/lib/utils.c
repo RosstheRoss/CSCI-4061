@@ -101,10 +101,9 @@ void shuffle(int nMappers, int nReducers) {
 		DIR *dir = opendir(newpath);
 		struct dirent* entry;
 		while ((entry = readdir(dir)) != NULL) {
-			char newmsg[200];
 			if (!strcmp(".", entry->d_name) || !strcmp("..", entry->d_name))
 				continue;
-			
+			sprintf(message.msgText, "%s/%s", newpath, entry -> d_name);
 			message.msgType = hashFunction(entry -> d_name, nReducers);
 			printf("%ld\n", message.msgType);
 			msgsnd(id, &message, chunkSize, 0);
