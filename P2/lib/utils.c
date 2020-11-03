@@ -97,7 +97,6 @@ void shuffle(int nMappers, int nReducers) {
 	for (int i = 1; i <= nMappers; i++) {
 		char newpath[100];
 		sprintf(newpath, "%s/output/MapOut/Map_%d", path, i);
-		printf("%s\n", newpath);
 		DIR *dir = opendir(newpath);
 		struct dirent* entry;
 		while ((entry = readdir(dir)) != NULL) {
@@ -105,6 +104,7 @@ void shuffle(int nMappers, int nReducers) {
 				continue;
 			sprintf(message.msgText, "%s/%s", newpath, entry -> d_name);
 			message.msgType = hashFunction(entry -> d_name, nReducers);
+			printf("%s\n", message.msgText);
 			printf("%ld\n", message.msgType);
 			msgsnd(id, &message, chunkSize, 0);
 			}
