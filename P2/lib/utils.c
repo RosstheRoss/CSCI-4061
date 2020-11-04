@@ -21,7 +21,6 @@ char *getChunkData(int mapperID) {
 	struct msgBuffer message = makeMessage();
 	//Queue ID
 	int mid = openQueue();
-	//printf("MAPPER ID:%d\n", mapperID);
 	msgrcv(mid, &message, MSGSIZE, mapperID, 0);
 	if (strncmp("END", message.msgText, 3) == 0)
 		return NULL;
@@ -37,7 +36,6 @@ void sendChunkData(char *inputFile, int nMappers) {
 	int msgid = openQueue();
 	closeQueue(msgid);
 	msgid = openQueue();
-	// DEBUG! Remove if already exists when opening queue for the first time
 	int map = 0;
 	FILE* file = fopen(inputFile, "r");
 	// construct chunks of 1024 bytes
