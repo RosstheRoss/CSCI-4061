@@ -119,6 +119,10 @@ void shuffle(int nMappers, int nReducers) {
 			printf("%ld\n", message.msgType);
 			msgsnd(id, &message, MSGSIZE, 0);
 			}
+		for (int i = 1; i <= nReducers; i++) {
+				struct msgBuffer END = {i, "END"};
+				msgsnd(id, &END, MSGSIZE, 0);
+			}
 		closedir(dir);
 	}
 }
