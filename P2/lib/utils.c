@@ -24,7 +24,7 @@ char *getChunkData(int mapperID) {
 	msgrcv(mid, &message, MSGSIZE, mapperID, 0);
 	if (strncmp("END", message.msgText, 3) == 0)
 		return NULL;
-	char* value = malloc(1024); // chunkSize or MSGSIZE?
+	char* value = malloc(1024);
 	strcpy(value, message.msgText);
 	return value;
 }
@@ -85,9 +85,7 @@ int getInterData(char *Qkey, int reducerID) {
 }
 
 void shuffle(int nMappers, int nReducers) {
-	//TODO: Error checking!!!!!!!!!!!!!
 	struct msgBuffer message = makeMessage();
-	//Once again, MAKE SURE THIS WORKS PROPERLY!
 	int id = openQueue();
 	for (int i = 1; i <= nMappers; i++) {
 		char newpath[100];
