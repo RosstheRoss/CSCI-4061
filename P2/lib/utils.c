@@ -79,9 +79,7 @@ int getInterData(char *Qkey, int reducerID) {
 }
 
 void shuffle(int nMappers, int nReducers) {
-	//TODO: Error checking!!!!!!!!!!!!!
 	struct msgBuffer message = makeMessage();
-	//Once again, MAKE SURE THIS WORKS PROPERLY!
 	int id = openQueue();
 	for (int i = 1; i <= nMappers; i++) {
 		char newpath[100];
