@@ -90,12 +90,9 @@ int getInterData(char *Qkey, int reducerID) {
 	struct msgBuffer message= makeMessage();
 	//DEBUG! make sure it work.
 	int id = openQueue();
-	//Likes to hang
 	msgrcv(id, &message, MSGSIZE, reducerID, 0);
-	// printf("INTER DATA: %s\n", message.msgText);
-	// *Qkey = *message.msgText;
 	strcpy(Qkey, message.msgText);
-	// printf("INTER DATA: %s\n", Qkey);
+	printf("INTER DATA: %s\nREDUCER ID:%ld\n", Qkey, message.msgType);
 	return (strncmp("END", message.msgText, 3) != 0);
 }
 
@@ -113,9 +110,8 @@ void shuffle(int nMappers, int nReducers) {
 			if (!strcmp(".", entry->d_name) || !strcmp("..", entry->d_name))
 				continue;
 			sprintf(message.msgText, "%s/%s", newpath, entry -> d_name);
-			message.msgType = hashFunction(entry -> d_name, nReducers);
-			// printf("SENT SHUFFLE:%s\n", message.msgText);
-			// printf("%ld\n", message.msgType);
+			printf("%s\n%d\n", entry->d_name, hashFunction(entry->d_name, nReducers)+1);
+			message.msgType = (hashFunction(entry -> d_name, nReducers)+1);
 			msgsnd(id, &message, MSGSIZE, 0);
 			}
 		closedir(dir);
