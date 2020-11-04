@@ -45,7 +45,7 @@ void sendChunkData(char *inputFile, int nMappers) {
 		while(validChar(message.msgText[i])) {
 			message.msgText[i--] = '\0';
 		}
-		if (fseek(file, (i - 1023), SEEK_CUR) == -1) {
+		if (fseek(file, (i - 1023), SEEK_CUR) == -1)
 			break;
 		message.msgType = (map++ % nMappers) + 1;
 	
@@ -87,6 +87,8 @@ int getInterData(char *Qkey, int reducerID) {
 void shuffle(int nMappers, int nReducers) {
 	struct msgBuffer message = makeMessage();
 	int id = openQueue();
+	if (id == -1)
+		exit(-1);
 	for (int i = 1; i <= nMappers; i++) {
 		char newpath[100];
 		sprintf(newpath, "output/MapOut/Map_%d", i); // Removed /, add to current dir
@@ -106,7 +108,6 @@ void shuffle(int nMappers, int nReducers) {
 	}
 	for (int i = 1; i <= nReducers; i++) {
 		struct msgBuffer END = {i, "END"};
-		msgsnd(id, &END, MSGSIZE, 0);
 		if (msgsnd(id, &END, MSGSIZE, 0))
 			break;
 	}
