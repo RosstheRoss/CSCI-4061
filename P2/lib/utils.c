@@ -1,5 +1,6 @@
 #include "utils.h"
 
+// Helper functions, open and close the queue
 int openQueue() {
 	char cwd [50];
 	getcwd(cwd, 50);
@@ -9,6 +10,7 @@ int closeQueue(int id) {
 	return msgctl(id, IPC_RMID, NULL);
 }
 
+// Creates a message
 struct msgBuffer makeMessage() {
 	struct msgBuffer temp;
 	memset(temp.msgText, '\0', MSGSIZE);
@@ -16,6 +18,7 @@ struct msgBuffer makeMessage() {
 	return temp;
 }
 
+// Receives chunks from sendChunkData()
 char *getChunkData(int mapperID) {
 	//Message
 	struct msgBuffer message = makeMessage();
@@ -29,7 +32,7 @@ char *getChunkData(int mapperID) {
 	return value;
 }
 
-// sends chunks of size 1024 to the mappers in RR fashion
+// Sends chunks of size 1024 to the mappers in RR fashion
 void sendChunkData(char *inputFile, int nMappers) {
 	struct msgBuffer message = makeMessage();
 	// open message queue
@@ -72,6 +75,7 @@ int hashFunction(char* Qkey, int reducers){
     return (hash % reducers);
 }
 
+// Retrieves file path for the words reducer must reduce and compute the total count for
 int getInterData(char *Qkey, int reducerID) {
 	struct msgBuffer message= makeMessage();
 	//DEBUG! make sure it work.
@@ -84,6 +88,8 @@ int getInterData(char *Qkey, int reducerID) {
 	return (strncmp("END", message.msgText, 3) != 0);
 }
 
+// Divides the word.txt files in output/MapOut/Map_mapperID folders across nReducers and send filepath 
+// across nReducers randomly from a hash function
 void shuffle(int nMappers, int nReducers) {
 	struct msgBuffer message = makeMessage();
 	int id = openQueue();
@@ -91,7 +97,7 @@ void shuffle(int nMappers, int nReducers) {
 		exit(-1);
 	for (int i = 1; i <= nMappers; i++) {
 		char newpath[100];
-		sprintf(newpath, "output/MapOut/Map_%d", i); // Removed /, add to current dir
+		sprintf(newpath, "output/MapOut/Map_%d", i); 
 		DIR *dir = opendir(newpath);
 		if (dir == NULL)
 			break;
@@ -113,19 +119,19 @@ void shuffle(int nMappers, int nReducers) {
 	}
 }
 
-// check if the character is valid for a word
+// Check if the character is valid for a word
 int validChar(char c){
 	return (tolower(c) >= 'a' && tolower(c) <='z') ||
 					(c >= '0' && c <= '9');
 }
 
+// Gets words from the buffer
 char *getWord(char *chunk, int *i){
 	char *buffer = (char *)malloc(sizeof(char) * chunkSize);
 	memset(buffer, '\0', chunkSize);
 	int j = 0;
 	while((*i) < strlen(chunk)) {
 		// read a single word at a time from chunk
-		// printf("%d\n", i);
 		if (chunk[(*i)] == '\n' || chunk[(*i)] == ' ' || !validChar(chunk[(*i)]) || chunk[(*i)] == 0x0) {
 			buffer[j] = '\0';
 			if(strlen(buffer) > 0){
