@@ -67,7 +67,6 @@ void sendChunkData(char *inputFile, int nMappers) {
 		//printf("SENT CHUNK: %s\nSENT CHUNK MAPPER: %ld\n",message.msgText, message.msgType);
 		msgsnd(msgid, &message, MSGSIZE, 0);
 	}
-
 	for (int i = 1; i <= nMappers; i++) {
 		struct msgBuffer END = {i, "END"};
 		msgsnd(msgid, &END, MSGSIZE, 0);
