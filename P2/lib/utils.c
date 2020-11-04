@@ -23,7 +23,7 @@ char *getChunkData(int mapperID) {
 	int mid = openQueue();
 	//printf("MAPPER ID:%d\n", mapperID);
 	msgrcv(mid, &message, MSGSIZE, mapperID, 0);
-	printf("\n%s\n", message.msgText);
+	// printf("\n%s\n", message.msgText);
 	// printf("%d\n", strncmp("END", message.msgText, 3));
 	if (strncmp("END", message.msgText, 3) == 0)
 		return NULL;
@@ -96,7 +96,7 @@ int getInterData(char *Qkey, int reducerID) {
 	// printf("INTER DATA: %s\n", message.msgText);
 	// *Qkey = *message.msgText;
 	strcpy(Qkey, message.msgText);
-	printf("INTER DATA: %s\n", Qkey);
+	// printf("INTER DATA: %s\n", Qkey);
 	return (strncmp("END", message.msgText, 3) != 0);
 }
 
@@ -115,8 +115,8 @@ void shuffle(int nMappers, int nReducers) {
 				continue;
 			sprintf(message.msgText, "%s/%s", newpath, entry -> d_name);
 			message.msgType = hashFunction(entry -> d_name, nReducers);
-			printf("SENT SHUFFLE:%s\n", message.msgText);
-			printf("%ld\n", message.msgType);
+			// printf("SENT SHUFFLE:%s\n", message.msgText);
+			// printf("%ld\n", message.msgType);
 			msgsnd(id, &message, MSGSIZE, 0);
 			}
 		closedir(dir);
