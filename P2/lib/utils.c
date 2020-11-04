@@ -2,8 +2,7 @@
 
 int openQueue() {
 	char cwd [50];
-	if(getcwd(cwd, 50) == NULL)
-		return NULL;
+	getcwd(cwd, 50);
 	return msgget(ftok(cwd, 4061), 0666 | IPC_CREAT);
 }
 int closeQueue(int id) {
@@ -22,8 +21,7 @@ char *getChunkData(int mapperID) {
 	struct msgBuffer message = makeMessage();
 	//Queue ID
 	int mid = openQueue();
-	if (msgrcv(mid, &message, MSGSIZE, mapperID, 0) == -1)
-		exit(-1);
+	msgrcv(mid, &message, MSGSIZE, mapperID, 0);
 	if (strncmp("END", message.msgText, 3) == 0)
 		return NULL;
 	char* value = malloc(1024); // chunkSize or MSGSIZE?
@@ -35,18 +33,11 @@ char *getChunkData(int mapperID) {
 void sendChunkData(char *inputFile, int nMappers) {
 	struct msgBuffer message = makeMessage();
 	// open message queue
-	int msgid;
-	if (msgid == NULL)
-		exit(-1);
-	if (closeQueue(msgid) == -1)
-		exit(-1);
+	int msgid = openQueue();
+	closeQueue(msgid);
 	msgid = openQueue();
-	if (msgid == NULL)
-		exit(-1);
 	int map = 0;
 	FILE* file = fopen(inputFile, "r");
-	if (file == NULL)
-		exit(-1);
 	// construct chunks of 1024 bytes
 	while(fgets(message.msgText, chunkSize + 1, file) != NULL) {
 
@@ -54,19 +45,15 @@ void sendChunkData(char *inputFile, int nMappers) {
 		while(validChar(message.msgText[i])) {
 			message.msgText[i--] = '\0';
 		}
-		if (fseek(file, (i - 1023), SEEK_CUR) == -1) {
-			break;
-		}
+		fseek(file, (i - 1023), SEEK_CUR);
 		message.msgType = (map++ % nMappers) + 1;
 	
-		if (msgsnd(msgid, &message, MSGSIZE, 0) == -1)
-			exit(-1);
+		msgsnd(msgid, &message, MSGSIZE, 0);
 	}
 	for (int i = 1; i <= nMappers; i++) {
 		struct msgBuffer END = {i, "END"};
-		if (msgsnd(msgid, &END, MSGSIZE, 0) == -1)
-			exit(-1);
-		}
+		msgsnd(msgid, &END, MSGSIZE, 0);
+	}
 	fclose(file);
 }
 
@@ -86,10 +73,7 @@ int getInterData(char *Qkey, int reducerID) {
 	struct msgBuffer message= makeMessage();
 	//DEBUG! make sure it work.
 	int id = openQueue();
-	if (id == NULL)
-		exit(-1);
-	if (msgrcv(id, &message, MSGSIZE, reducerID, 0) == -1)
-		exit(-1);
+	msgrcv(id, &message, MSGSIZE, reducerID, 0);
 	strcpy(Qkey, message.msgText);
 	return (strncmp("END", message.msgText, 3) != 0);
 }
@@ -103,23 +87,19 @@ void shuffle(int nMappers, int nReducers) {
 		char newpath[100];
 		sprintf(newpath, "output/MapOut/Map_%d", i); // Removed /, add to current dir
 		DIR *dir = opendir(newpath);
-		if (dir == NULL)
-			break;
 		struct dirent* entry;
 		while ((entry = readdir(dir)) != NULL) {
 			if (!strcmp(".", entry->d_name) || !strcmp("..", entry->d_name))
 				continue;
 			sprintf(message.msgText, "%s/%s", newpath, entry -> d_name);
 			message.msgType = (hashFunction(entry -> d_name, nReducers)+1);
-			if (msgsnd(id, &message, MSGSIZE, 0) == NULL)
-				exit(-1);
+			msgsnd(id, &message, MSGSIZE, 0);
 			}
 		closedir(dir);
 	}
 	for (int i = 1; i <= nReducers; i++) {
 		struct msgBuffer END = {i, "END"};
-		if (msgsnd(id, &END, MSGSIZE, 0))
-			break;
+		msgsnd(id, &END, MSGSIZE, 0);
 	}
 }
 
