@@ -24,7 +24,7 @@ char *getChunkData(int mapperID) {
 	msgrcv(mid, &message, MSGSIZE, mapperID, 0);
 	if (strncmp("END", message.msgText, 3) == 0)
 		return NULL;
-	char* value = malloc(1024); // chunkSize or MSGSIZE?
+	char* value = malloc(1024);
 	strcpy(value, message.msgText);
 	return value;
 }
