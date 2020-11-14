@@ -131,7 +131,7 @@ int main(int argc, char **argv) {
   }
 
   // Get the input args
-
+  
   // Perform error checks on the input arguments
 
   // Change SIGINT action for grace termination
