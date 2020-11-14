@@ -77,6 +77,8 @@ void initCache(){
 char* getContentType(char * mybuf) {
   // Should return the content type based on the file type in the request
   // (See Section 5 in Project description for more details)
+
+  
 }
 
 // Function to open and read the file from the disk into the memory
@@ -166,6 +168,8 @@ int main(int argc, char **argv) {
   // Start the server
 
   // Create dispatcher and worker threads (all threads should be detachable)
+  pthread_t thread;
+  pthread_create(&thread, NULL, dispatch, NULL); // DEBUG! figure out last arg
 
   // Create dynamic pool manager thread (extra credit A)
 
