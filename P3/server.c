@@ -158,7 +158,9 @@ int main(int argc, char **argv) {
     return -1;
   }
   // Change SIGINT action for grace termination
-
+  struct sigaction act;
+  sigset_t sigset;
+  act.sa_handler = eggs;
   // Open log file
 
   // Change the current working directory to server root directory
@@ -166,17 +168,19 @@ int main(int argc, char **argv) {
   // Initialize cache (extra credit B)
 
   // Start the server
-
+  init(port);
   // Create dispatcher and worker threads (all threads should be detachable)
   pthread_t thread;
   pthread_create(&thread, NULL, dispatch, NULL); // DEBUG! figure out last arg
 
   // Create dynamic pool manager thread (extra credit A)
 
-  // Terminate server gracefully
-    // Print the number of pending requests in the request queue
-    // close log file
-    // Remove cache (extra credit B)
-
   return 0;
 }
+static void eggs(int signo) {
+  // Terminate server gracefully
+  // Print the number of pending requests in the request queue
+  // close log file
+  // Remove cache (extra credit B)
+}
+
