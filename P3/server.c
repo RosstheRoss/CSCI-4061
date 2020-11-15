@@ -180,8 +180,11 @@ int main(int argc, char **argv) {
   // Start the server
   init(port);
   // Create dispatcher and worker threads (all threads should be detachable)
-  pthread_t thread;
-  pthread_create(&thread, NULL, dispatch, NULL); // DEBUG! figure out last arg
+  pthread_t dThreads[dispatchers];
+  pthread_create(&dThreads, NULL, dispatch, NULL); // DEBUG! figure out last arg
+
+  pthread_t wThreads[workers];
+  pthread_create(&wThreads, NULL, worker, NULL); //TODO: Worker arguments.
 
   // Create dynamic pool manager thread (extra credit A)
 
