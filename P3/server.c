@@ -134,13 +134,28 @@ int main(int argc, char **argv) {
   }
 
   // Get the input args
+
+  //Port
   int port = argv[3];
+
+  //Webroot path
   char* path = argv[4];
+
+  //(static) number of dispatchers
   int dispatchers = argv[5];
+  
+  //(static) number of workers
   int workers = argv[6];
-  int dynFlag = argv[7];
+  
+  //Dynamic worker flag
+  bool dynFlag = argv[7];
+  
+  //Queue Length
   int qLen = argv[8];
+  
+  //Max cache size
   int cSiz = argv[9];
+  
   // Perform error checks on the input arguments
   if (port < 1025 || port > 65535) {
     perror("Invalid port. Port must be greater than 1024 or less than 65536.\n");
@@ -214,6 +229,8 @@ int main(int argc, char **argv) {
   printf("This should never be printed.");
   return 42;
 }
+
+//Placeholder name. Sets exit flag so process can die happily and not sad.
 static void eggs(int signo) {
   exitFlag |= 1;
 }
