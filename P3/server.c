@@ -171,7 +171,10 @@ int main(int argc, char **argv) {
   // Open log file
   FILE* logfile = fopen("serverlog.txt", "a+");
   // Change the current working directory to server root directory
-  chdir("testing/");
+  if (chdir("testing") == -1) {
+    perror("Could not find root webserver directory testing. Exiting\n");
+    return -1;
+  }
   // Initialize cache (extra credit B)
 
   // Start the server
