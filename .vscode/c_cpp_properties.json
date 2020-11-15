@@ -1,9 +1,9 @@
 {
     "configurations": [
         {
-            "name": "Linux (Project 2)",
+            "name": "Linux",
             "includePath": [
-                "${workspaceFolder}/P2/include"
+                "${workspaceFolder}/**"
             ],
             "defines": [
                 "__USE_POSIX",
