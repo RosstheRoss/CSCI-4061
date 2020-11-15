@@ -176,7 +176,7 @@ int main(int argc, char **argv) {
     return -1;
   }
   // Initialize cache (extra credit B)
-  mkdir(cache, 0666);
+
   // Start the server
   init(port);
   // Create dispatcher threads (make detachable????)
