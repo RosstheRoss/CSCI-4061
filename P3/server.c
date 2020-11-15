@@ -179,16 +179,20 @@ int main(int argc, char **argv) {
   mkdir(cache, 0666);
   // Start the server
   init(port);
-  // Create dispatcher and worker threads (all threads should be detachable)
+  // Create dispatcher threads (make detachable????)
   pthread_t dThreads[dispatchers];
-  pthread_create(&dThreads, NULL, dispatch, NULL); // DEBUG! figure out last arg
-
+  for (int i=0; i<dispatchers; i++) {
+    pthread_create(&dThreads[i], NULL, dispatch, NULL); // DEBUG! figure out last arg
+  }
+  //Create workers (make detachable?????)
   pthread_t wThreads[workers];
-  pthread_create(&wThreads, NULL, worker, NULL); //TODO: Worker arguments.
-
+  for (int i = 0; i < workers; i++) {
+    pthread_create(&wThreads[i], NULL, worker, NULL); //TODO: Worker arguments
+  }
   // Create dynamic pool manager thread (extra credit A)
-
-  //Server loop (RUNS FOREVER)
+  pthread_t pThread;
+  pthread_create(pThread, NULL, dynamic_pool_size_update, NULL);
+      //Server loop (RUNS FOREVER)
   while (1) {
     //TODO: Add something else?
 
@@ -203,7 +207,6 @@ int main(int argc, char **argv) {
       printf("All threads have been successfully killed and cache has successfully been cleared.\nExiting now.\n");
       return 0;
     }
-    
   }
   printf("This should never be printed.");
   return 42;
