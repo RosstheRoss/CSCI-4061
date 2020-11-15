@@ -124,6 +124,7 @@ void * worker(void *arg) {
 
 /**********************************************************************************/
 
+static volatile sig_atomic_t exitFlag = 0;
 int main(int argc, char **argv) {
 
   // Error check on number of arguments
@@ -161,10 +162,16 @@ int main(int argc, char **argv) {
   struct sigaction act;
   sigset_t sigset;
   act.sa_handler = eggs;
+  act.sa_flags = 0;
+  if (sigemptyset(&act.sa_mask) == -1 ||
+      sigaction(SIGINT, &act, NULL) == -1) {
+        perror("SIGINT handler failed.\n");
+        return -1;
+  }
   // Open log file
-
+  FILE* logfile = fopen("serverlog.txt", "a+");
   // Change the current working directory to server root directory
-
+  chdir("testing/");
   // Initialize cache (extra credit B)
 
   // Start the server
@@ -175,12 +182,25 @@ int main(int argc, char **argv) {
 
   // Create dynamic pool manager thread (extra credit A)
 
-  return 0;
+  //Server loop (RUNS FOREVER)
+  while (1) {
+    //TODO: Add something else?
+
+    // Terminate server gracefully
+    if (exitFlag){
+      // Print the number of pending requests in the request queue
+      // close log file
+      fclose(logfile);
+      // Remove cache (extra credit B)
+
+      return 0;
+    }
+    
+  }
+  printf("This should never be printed.");
+  return 42;
 }
 static void eggs(int signo) {
-  // Terminate server gracefully
-  // Print the number of pending requests in the request queue
-  // close log file
-  // Remove cache (extra credit B)
+  exitFlag |= 1;
 }
 
