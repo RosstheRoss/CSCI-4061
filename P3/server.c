@@ -194,6 +194,7 @@ int main(int argc, char **argv) {
 
     // Terminate server gracefully
     if (exitFlag){
+      printf("SIGINT caught, exiting now (please wait for the threads to die)\n");
       // Print the number of pending requests in the request queue
       // close log file
       fclose(logfile);
