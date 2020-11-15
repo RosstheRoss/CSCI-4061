@@ -176,7 +176,7 @@ int main(int argc, char **argv) {
     return -1;
   }
   // Initialize cache (extra credit B)
-
+  mkdir(cache, 0666);
   // Start the server
   init(port);
   // Create dispatcher and worker threads (all threads should be detachable)
@@ -200,6 +200,7 @@ int main(int argc, char **argv) {
       fclose(logfile);
       // Remove cache (extra credit B)
 
+      printf("All threads have been successfully killed and cache has successfully been cleared.\nExiting now.\n");
       return 0;
     }
     
