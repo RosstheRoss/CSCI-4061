@@ -190,9 +190,12 @@ int main(int argc, char **argv) {
     pthread_create(&wThreads[i], NULL, worker, NULL); //TODO: Worker arguments
   }
   // Create dynamic pool manager thread (extra credit A)
-  pthread_t pThread;
-  pthread_create(pThread, NULL, dynamic_pool_size_update, NULL);
-      //Server loop (RUNS FOREVER)
+  /*Commented out for now as it is not needed
+    pthread_t pThread;
+    pthread_create(pThread, NULL, dynamic_pool_size_update, NULL); //TODO: possible arguments
+  */
+ 
+  //Server loop (RUNS FOREVER)
   while (1) {
     //TODO: Add something else?
 
