@@ -231,17 +231,17 @@ int main(int argc, char **argv) {
   // Create dispatcher threads (make detachable????)
   pthread_t dThreads[dispatchers];
   for (int i=0; i<dispatchers; i++) {
-    pthread_create(&dThreads[i], NULL, dispatch, NULL); // DEBUG! figure out last arg
+    pthread_create(&dThreads[i], PTHREAD_CREATE_DETACHED, dispatch, NULL); // DEBUG! figure out last arg
   }
   //Create workers (make detachable?????)
   pthread_t wThreads[workers];
   for (int i = 0; i < workers; i++) {
-    pthread_create(&wThreads[i], NULL, worker, NULL); //TODO: Worker arguments
+    pthread_create(&wThreads[i], PTHREAD_CREATE_DETACHED, worker, NULL); //TODO: Worker arguments
   }
   // Create dynamic pool manager thread (extra credit A)
   if (dynFlag) {
     pthread_t pThread;
-    pthread_create(&pThread, NULL, dynamic_pool_size_update, NULL); //TODO: possible arguments
+    pthread_create(&pThread, PTHREAD_CREATE_DETACHED, dynamic_pool_size_update, NULL); //TODO: possible arguments
   }
 
  
