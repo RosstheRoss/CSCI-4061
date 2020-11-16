@@ -52,6 +52,7 @@ void * dynamic_pool_size_update(void *arg) {
 // Function to check whether the given request is present in cache
 int getCacheIndex(char *request){
   /// return the index if the request is present in the cache
+  return 0;
 }
 
 // Function to add the request and its file content into the cache
@@ -124,7 +125,13 @@ void * worker(void *arg) {
 
 /**********************************************************************************/
 
+//Flag for when server needs to die nicely
 static volatile sig_atomic_t exitFlag = 0;
+
+//Sets exit flag so process can die happily and not sad.
+static void eggs(int signo) {
+  exitFlag |= 1;
+}
 int main(int argc, char **argv) {
 
   // Error check on number of arguments
@@ -136,26 +143,26 @@ int main(int argc, char **argv) {
   // Get the input args
 
   //Port
-  int port = argv[3];
+  int port = (int) *argv[3];
 
   //Webroot path
   char* path = argv[4];
 
   //(static) number of dispatchers
-  int dispatchers = argv[5];
-  
+  int dispatchers = (int) *argv[5];
+
   //(static) number of workers
-  int workers = argv[6];
-  
+  int workers = (int) *argv[6];
+
   //Dynamic worker flag
-  int dynFlag = argv[7];
-  
+  int dynFlag = (int) *argv[7];
+
   //Queue Length
-  int qLen = argv[8];
-  
+  int qLen = (int) *argv[8];
+
   //Max cache size
-  int cSiz = argv[9];
-  
+  int cSiz = (int) *argv[9];
+
   // Perform error checks on the input arguments
   if (port < 1025 || port > 65535) {
     printf("Invalid port. Port must be greater than 1024 or less than 65536.\n");
@@ -184,10 +191,10 @@ int main(int argc, char **argv) {
         return -1;
   }
   // Open log file
-  FILE* logfile = fopen("serverlog.txt", "a+");
+  FILE* logfile = fopen("webserver_log", "a+");
   // Change the current working directory to server root directory
   if (chdir("testing") == -1) {
-    printf("Could not find root webserver \"directory testing\". Exiting\n");
+    printf("Could not find root webserver directory \"testing\". Exiting\n");
     return -1;
   }
   // Initialize cache (extra credit B)
@@ -216,8 +223,14 @@ int main(int argc, char **argv) {
 
     // Terminate server gracefully
     if (exitFlag){
-      printf("SIGINT caught, exiting now (please wait for the threads to die)\n");
+      printf("SIGINT caught, exiting now. (please wait for the threads to die)\n");
       // Print the number of pending requests in the request queue
+      /*TODO*/
+      //Kill all dispatch and worker threads
+      for (int j=0; j<dispatchers; j++)
+        pthread_cancel(dThreads[j]);
+      for (int j=0; j<workers;j++)
+        pthread_cancel(wThreads[j]);
       // close log file
       fclose(logfile);
       // Remove cache (extra credit B)
@@ -229,9 +242,3 @@ int main(int argc, char **argv) {
   printf("This should never be printed.");
   return 42;
 }
-
-//Placeholder name. Sets exit flag so process can die happily and not sad.
-static void eggs(int signo) {
-  exitFlag |= 1;
-}
-
