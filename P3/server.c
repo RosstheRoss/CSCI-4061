@@ -180,7 +180,7 @@ int main(int argc, char **argv) {
   //Max cache size
   int cSiz = atoi(argv[9]);
 
-  // Perform error checks on the input arguments
+ /* -- ERROR CHECKING -- */
   if (port < 1025 || port > 65535) {
     printf("Invalid port. Port must be greater than 1024 or less than 65536.\n");
     return -1;
@@ -197,9 +197,10 @@ int main(int argc, char **argv) {
     printf("Queue length is invalid.\n");
     return -1;
   }
+  /* -- END ERROR CHECKING -- */
+
   // Change SIGINT action for grace termination
   struct sigaction act;
-  sigset_t sigset;
   act.sa_handler = eggs;
   act.sa_flags = 0;
   if (sigemptyset(&act.sa_mask) == -1 ||
@@ -208,13 +209,19 @@ int main(int argc, char **argv) {
         return -1;
   }
   // Open log file
-  FILE* logfile = fopen("webserver_log", "a+");
+  FILE* logfile = fopen("webserver_log", "a");
+
   // Change the current working directory to server root directory
   if (chdir(path) == -1) {
     perror("Directory Change error");
     return -1;
   }
   // Initialize cache (extra credit B)
+  cache_entry_t *dynQ;
+  if (cSiz != 0) {
+    dynQ =  (cache_entry_t*) malloc(cSiz * sizeof(cache_entry_t));
+  } 
+
   // Start the server
   init(port);
   // Create dispatcher threads (make detachable????)
@@ -263,7 +270,8 @@ int main(int argc, char **argv) {
         return -6;
       }
       // Remove cache (extra credit B)
-
+      if (cSiz != 0)
+        free(dynQ);
       printf("All threads have been successfully killed and cache has successfully been cleared.\nExiting now.\n");
       return 0;
     }
