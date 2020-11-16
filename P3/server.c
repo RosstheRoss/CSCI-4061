@@ -215,10 +215,6 @@ int main(int argc, char **argv) {
     return -1;
   }
   // Initialize cache (extra credit B)
-<<<<<<< HEAD
-
-=======
->>>>>>> startmain
   // Start the server
   init(port);
   // Create dispatcher threads (make detachable????)
