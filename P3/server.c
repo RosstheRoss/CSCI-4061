@@ -78,14 +78,31 @@ void initCache(){
 char* getContentType(char * mybuf) {
   // Should return the content type based on the file type in the request
   // (See Section 5 in Project description for more details)
+  char* ext = strrchr(mybuf, '.');
 
-  
+  if (ext == NULL) {
+      printf("Filetype not found. Exiting\n");
+      exit(-1);
+  }
+  else if ((!strcmp((ext + 1), "htm")) || (!strcmp((ext + 1), "html"))) {
+    return "text/html";
+  }
+  else if (!strcmp((ext + 1), "jpg")) {
+    return "image/jpeg";
+  }
+  else if (!strcmp((ext + 1), "gif")) {
+    return "image/gif";
+  }
+  else {
+    return "text/plain";
+  }
 }
 
 // Function to open and read the file from the disk into the memory
 // Add necessary arguments as needed
 int readFromDisk(/*necessary arguments*/) {
     // Open and read the contents of file given the request
+    
 }
 
 /**********************************************************************************/
@@ -198,7 +215,10 @@ int main(int argc, char **argv) {
     return -1;
   }
   // Initialize cache (extra credit B)
+<<<<<<< HEAD
 
+=======
+>>>>>>> startmain
   // Start the server
   init(port);
   // Create dispatcher threads (make detachable????)
