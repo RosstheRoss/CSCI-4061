@@ -219,7 +219,11 @@ int main(int argc, char **argv) {
   // Initialize cache (extra credit B)
   cache_entry_t *dynQ;
   if (cSiz != 0) {
+    //Should the queue start this large?
     dynQ =  (cache_entry_t*) malloc(cSiz * sizeof(cache_entry_t));
+    if (dynQ == NULL) {
+      printf("malloc cannot allocate the initial requested memory.\n")
+    }
   } 
 
   // Start the server
