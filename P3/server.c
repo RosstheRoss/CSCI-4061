@@ -160,25 +160,25 @@ int main(int argc, char **argv) {
   // Get the input args
 
   //Port
-  int port = (int) *argv[3];
+  int port = atoi(argv[3]);
 
   //Webroot path
   char* path = argv[4];
 
   //(static) number of dispatchers
-  int dispatchers = (int) *argv[5];
+  int dispatchers = atoi(argv[5]);
 
   //(static) number of workers
-  int workers = (int) *argv[6];
+  int workers = atoi(argv[6]);
 
   //Dynamic worker flag
-  int dynFlag = (int) *argv[7];
+  int dynFlag = atoi(argv[7]);
 
   //Queue Length
-  int qLen = (int) *argv[8];
+  int qLen = atoi(argv[8]);
 
   //Max cache size
-  int cSiz = (int) *argv[9];
+  int cSiz = atoi(argv[9]);
 
   // Perform error checks on the input arguments
   if (port < 1025 || port > 65535) {
@@ -204,14 +204,14 @@ int main(int argc, char **argv) {
   act.sa_flags = 0;
   if (sigemptyset(&act.sa_mask) == -1 ||
       sigaction(SIGINT, &act, NULL) == -1) {
-        printf("SIGINT handler failed.\n");
+        perror("SIGINT Handler Error");
         return -1;
   }
   // Open log file
   FILE* logfile = fopen("webserver_log", "a+");
   // Change the current working directory to server root directory
-  if (chdir("testing") == -1) {
-    printf("Could not find root webserver directory \"testing\". Exiting\n");
+  if (chdir(path) == -1) {
+    perror("Directory Change error");
     return -1;
   }
   // Initialize cache (extra credit B)
@@ -228,10 +228,11 @@ int main(int argc, char **argv) {
     pthread_create(&wThreads[i], NULL, worker, NULL); //TODO: Worker arguments
   }
   // Create dynamic pool manager thread (extra credit A)
-  /*Commented out for now as it is not needed
+  if (dynFlag) {
     pthread_t pThread;
-    pthread_create(pThread, NULL, dynamic_pool_size_update, NULL); //TODO: possible arguments
-  */
+    pthread_create(&pThread, NULL, dynamic_pool_size_update, NULL); //TODO: possible arguments
+  }
+
  
   //Server loop (RUNS FOREVER)
   while (1) {
@@ -239,16 +240,28 @@ int main(int argc, char **argv) {
 
     // Terminate server gracefully
     if (exitFlag){
-      printf("SIGINT caught, exiting now. (please wait for the threads to die)\n");
+      printf("SIGINT caught, exiting now.\nWorker threads now being killed.\n");
       // Print the number of pending requests in the request queue
       /*TODO*/
       //Kill all dispatch and worker threads
-      for (int j=0; j<dispatchers; j++)
-        pthread_cancel(dThreads[j]);
-      for (int j=0; j<workers;j++)
-        pthread_cancel(wThreads[j]);
+      for (int j=0; j<dispatchers; j++) {
+        if (pthread_cancel(dThreads[j]) != 0) {
+          printf("Thread ID %ld refused to die.\nThis may or may not be disasterous.\n", dThreads[j]);
+          continue;
+        }
+      }
+      printf("All dispatcher threads have been killed. Now killing worker threads.");
+      for (int j=0; j<workers;j++) {
+        if(pthread_cancel(wThreads[j]) != 0) {
+          printf("Thread ID %ld refused to die.\nThis could be disasterous.\n", wThreads[j]);
+          continue;
+        }
+      }
       // close log file
-      fclose(logfile);
+      if (fclose(logfile) != 0) {
+        perror("fclose error");
+        return -6;
+      }
       // Remove cache (extra credit B)
 
       printf("All threads have been successfully killed and cache has successfully been cleared.\nExiting now.\n");
