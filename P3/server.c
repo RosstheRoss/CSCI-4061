@@ -111,13 +111,14 @@ int readFromDisk(/*necessary arguments*/) {
 void * dispatch(void *arg) {
 
   while (1) {
-
     // Accept client connection
+    int newReq = accept_connection();
+    if (newReq >= 0) {
+      // Get request from the client
+      //get_request(newReq, something);
+      // Add the request into the queue
 
-    // Get request from the client
-
-    // Add the request into the queue
-
+    }
    }
    return NULL;
 }
@@ -226,22 +227,25 @@ int main(int argc, char **argv) {
     }
   } 
 
+  pthread_attr_t attr;
+  pthread_attr_init(&attr);
+  pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
   // Start the server
   init(port);
   // Create dispatcher threads (make detachable????)
   pthread_t dThreads[dispatchers];
   for (int i=0; i<dispatchers; i++) {
-    pthread_create(&dThreads[i], PTHREAD_CREATE_DETACHED, dispatch, NULL); // DEBUG! figure out last arg
+    pthread_create(&dThreads[i], &attr, dispatch, NULL); // DEBUG! figure out last arg
   }
   //Create workers (make detachable?????)
   pthread_t wThreads[workers];
   for (int i = 0; i < workers; i++) {
-    pthread_create(&wThreads[i], PTHREAD_CREATE_DETACHED, worker, NULL); //TODO: Worker arguments
+    pthread_create(&wThreads[i], &attr, worker, NULL); //TODO: Worker arguments
   }
   // Create dynamic pool manager thread (extra credit A)
   if (dynFlag) {
     pthread_t pThread;
-    pthread_create(&pThread, PTHREAD_CREATE_DETACHED, dynamic_pool_size_update, NULL); //TODO: possible arguments
+    pthread_create(&pThread, &attr, dynamic_pool_size_update, NULL); //TODO: possible arguments
   }
 
  
@@ -251,23 +255,10 @@ int main(int argc, char **argv) {
 
     // Terminate server gracefully
     if (exitFlag){
-      printf("SIGINT caught, exiting now.\nWorker threads now being killed.\n");
+      printf("SIGINT caught, exiting now.\n");
       // Print the number of pending requests in the request queue
       /*TODO*/
       //Kill all dispatch and worker threads
-      for (int j=0; j<dispatchers; j++) {
-        if (pthread_cancel(dThreads[j]) != 0) {
-          printf("Thread ID %ld refused to die.\nThis may or may not be disasterous.\n", dThreads[j]);
-          continue;
-        }
-      }
-      printf("All dispatcher threads have been killed. Now killing worker threads.");
-      for (int j=0; j<workers;j++) {
-        if(pthread_cancel(wThreads[j]) != 0) {
-          printf("Thread ID %ld refused to die.\nThis could be disasterous.\n", wThreads[j]);
-          continue;
-        }
-      }
       // close log file
       if (fclose(logfile) != 0) {
         perror("fclose error");
@@ -276,10 +267,10 @@ int main(int argc, char **argv) {
       // Remove cache (extra credit B)
       if (cSiz != 0)
         free(dynQ);
-      printf("All threads have been successfully killed and cache has successfully been cleared.\nExiting now.\n");
+      printf("Aache has successfully been cleared.\nExiting now.\n");
       return 0;
     }
   }
-  printf("This should never be printed.");
+  printf("\n\nThis should never be printed.\n\n");
   return 42;
 }
