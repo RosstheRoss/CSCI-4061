@@ -148,7 +148,7 @@ int main(int argc, char **argv) {
   int workers = argv[6];
   
   //Dynamic worker flag
-  bool dynFlag = argv[7];
+  int dynFlag = argv[7];
   
   //Queue Length
   int qLen = argv[8];
@@ -158,19 +158,19 @@ int main(int argc, char **argv) {
   
   // Perform error checks on the input arguments
   if (port < 1025 || port > 65535) {
-    perror("Invalid port. Port must be greater than 1024 or less than 65536.\n");
+    printf("Invalid port. Port must be greater than 1024 or less than 65536.\n");
     return -1;
   }
   if (dispatchers > MAX_THREADS || dispatchers < 1) {
-    perror("Number of dispatchers is invalid. It must be greater than 0 or less than 101.\n");
+    printf("Number of dispatchers is invalid. It must be greater than 0 or less than 101.\n");
     return -1;
   }
   if (workers > MAX_THREADS || workers < 1) {
-    perror("Number of dispatchers is invalid. It must be greater than 0 or less than 101.\n");
+    printf("Number of dispatchers is invalid. It must be greater than 0 or less than 101.\n");
     return -1;
   }
   if (qLen > MAX_queue_len || qLen <= 0) {
-    perror("Queue length is invalid.\n");
+    printf("Queue length is invalid.\n");
     return -1;
   }
   // Change SIGINT action for grace termination
@@ -180,14 +180,14 @@ int main(int argc, char **argv) {
   act.sa_flags = 0;
   if (sigemptyset(&act.sa_mask) == -1 ||
       sigaction(SIGINT, &act, NULL) == -1) {
-        perror("SIGINT handler failed.\n");
+        printf("SIGINT handler failed.\n");
         return -1;
   }
   // Open log file
   FILE* logfile = fopen("serverlog.txt", "a+");
   // Change the current working directory to server root directory
   if (chdir("testing") == -1) {
-    perror("Could not find root webserver directory testing. Exiting\n");
+    printf("Could not find root webserver \"directory testing\". Exiting\n");
     return -1;
   }
   // Initialize cache (extra credit B)
