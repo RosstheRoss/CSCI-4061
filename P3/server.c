@@ -222,7 +222,7 @@ int main(int argc, char **argv) {
     //Should the queue start this large?
     dynQ =  (cache_entry_t*) malloc(cSiz * sizeof(cache_entry_t));
     if (dynQ == NULL) {
-      printf("malloc cannot allocate the initial requested memory.\n")
+      printf("malloc cannot allocate the initial requested memory.\n");
     }
   } 
 
