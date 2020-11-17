@@ -258,7 +258,7 @@ int main(int argc, char **argv) {
   if (sigemptyset(&act.sa_mask) == -1 ||
       sigaction(SIGINT, &act, NULL) == -1) {
         perror("SIGINT Handler Error");
-        return -1;
+        return -2;
   }
   // Open log file to make it exist
   FILE* logfile = fopen("webserver_log", "w");
@@ -267,7 +267,7 @@ int main(int argc, char **argv) {
   // Change the current working directory to server root directory
   if (chdir(path) == -1) {
     perror("Directory Change error");
-    return -1;
+    return -2;
   }
   // Initialize cache (extra credit B)
   cache_entry_t *dynQ;
@@ -280,6 +280,7 @@ int main(int argc, char **argv) {
     }
   } 
 
+  //Make sure threads are all detached
   pthread_attr_t attr;
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
