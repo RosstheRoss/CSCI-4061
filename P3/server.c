@@ -92,13 +92,13 @@ char* getContentType(char * mybuf) {
       printf("Filetype not found. Exiting\n");
       exit(-1);
   }
-  else if ((!strcmp((ext + 1), "htm")) || (!strcmp((ext + 1), "html"))) {
+  else if ((strcmp((ext + 1), "htm") == 0) || (strcmp((ext + 1), "html") == 0)) {
     return "text/html";
   }
-  else if (!strcmp((ext + 1), "jpg")) {
+  else if (strcmp((ext + 1), "jpg") == 0) {
     return "image/jpeg";
   }
-  else if (!strcmp((ext + 1), "gif")) {
+  else if (strcmp((ext + 1), "gif") == 0) {
     return "image/gif";
   }
   else {
