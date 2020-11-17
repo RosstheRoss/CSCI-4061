@@ -272,9 +272,10 @@ int main(int argc, char **argv) {
   cache_entry_t *dynQ;
   if (cSiz != 0) {
     //Should the queue start this large?
-    dynQ =  (cache_entry_t*) malloc(cSiz * sizeof(cache_entry_t));
+    dynQ =  (cache_entry_t*) calloc(sizeof(cache_entry_t), cSiz);
     if (dynQ == NULL) {
       printf("malloc cannot allocate the initial requested memory.\n");
+      exit(-2);
     }
   } 
 
@@ -320,7 +321,7 @@ int main(int argc, char **argv) {
       // Remove cache (extra credit B)
       if (cSiz != 0)
         free(dynQ);
-      printf("Aache has successfully been cleared.\nExiting now.\n");
+      printf("Cache has successfully been cleared.\nExiting now.\n");
       return 0;
     }
   }
