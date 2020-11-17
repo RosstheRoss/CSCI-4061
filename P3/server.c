@@ -140,6 +140,7 @@ void * dispatch(void *arg) {
           //Hopefully this works. Please work
           tempNode->fd = newReq;
           tempNode->request= tempBuf;
+          free(tempBuf);
           break;
         } else {
           traverse = traverse -> next;
