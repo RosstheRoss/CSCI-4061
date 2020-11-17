@@ -186,6 +186,7 @@ void * worker(void *arg) {
     struct stat* oob;
     fstat(request->fd, &oob);
     numbytes = oob->st_size;
+    //TODO: add return_error as well for when trying to find something that does not exist.
     return_result(request->fd, getContentType(request->request), workerBuf, numbytes);
   }
   return NULL;
