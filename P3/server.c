@@ -154,6 +154,7 @@ void * dispatch(void *arg) {
 
 // Function to retrieve the request from the queue, process it and then return a result to the client
 void * worker(void *arg) {
+  //TODO: Fix this (gcc does not like this case as void* and int are different sizes)
   int id = (int) arg;
   long numbytes;
   unsigned long long numReqs = 0;
@@ -184,7 +185,7 @@ void * worker(void *arg) {
     readFromDisk(... workerBuf); 
     //use fstat's stat_st to get numbytes?
     struct stat* oob;
-    fstat(request->fd, &oob);
+    fstat(request->fd, oob);
     numbytes = oob->st_size;
     //TODO: add return_error as well for when trying to find something that does not exist.
     return_result(request->fd, getContentType(request->request), workerBuf, numbytes);
