@@ -246,7 +246,7 @@ int main(int argc, char **argv) {
     printf("Number of dispatchers is invalid. It must be greater than 0 or less than 101.\n");
     return -1;
   }
-  if (qLen > MAX_queue_len || qLen <= 0) {
+  if (qLen > MAX_queue_len || qLen < 1) {
     printf("Queue length is invalid.\n");
     return -1;
   }
