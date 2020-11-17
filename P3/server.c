@@ -22,6 +22,7 @@
 
 int port, workers, dispatchers, dynFlag, qLen, cSiz = 0;
 char* path;
+pthread_mutex_t Qlock;
 
 /*
   THE CODE STRUCTURE GIVEN BELOW IS JUST A SUGGESTION. FEEL FREE TO MODIFY AS NEEDED
@@ -82,7 +83,7 @@ void initCache(){
 
 /* ************************************ Utilities ********************************/
 // Function to get the content type from the request
-char* getContentType(char * mybuf) {
+char* Type(char * mybuf) {
   // Should return the content type based on the file type in the request
   // (See Section 5 in Project description for more details)
   char* ext = strrchr(mybuf, '.');
@@ -127,9 +128,12 @@ void * dispatch(void *arg) {
       // Add the request into the queue
       for(int i = 0; i < qLen; i++) {
         if (traverse == NULL) {
-          //Add sh!t to queue
+          //Add things to queue. Lock & unlock to prevent a race condition
+          pthread_mutex_lock(&Qlock);
           request_t * tempNode = (request_t*) calloc(1, sizeof(request_t *)); // Yes, he spelled it like that on purpose
           char* tempBuf = malloc(BUFF_SIZE); // Buffer to store the requested filename 
+          pthread_mutex_unlock(&Qlock);
+
           if (get_request(newReq, tempBuf) != 0) {
             continue; // If get_request fails, try again
           }
@@ -152,12 +156,13 @@ void * dispatch(void *arg) {
 void * worker(void *arg) {
 
    while (1) {
-     request_t *traverse = Q;
-     if (traverse == NULL)
+     request_t *head = Q;
+     if (head == NULL)
       continue;
-    
      // Get the request from the queue
-    
+    pthread_mutex_lock(&Qlock);
+    return_result(head->fd, getContentType(head->request), );
+    pthread_mutex_unlock(&Qlock);
      // Get the data from the disk or the cache (extra credit B)
 
      // Log the request into the file and terminal
