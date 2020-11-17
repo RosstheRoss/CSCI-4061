@@ -252,7 +252,7 @@ int main(int argc, char **argv) {
   }
   /* -- END ERROR CHECKING -- */
 
-  // Change SIGINT action for grace termination
+  // Change SIGINT action for graceful termination
   struct sigaction act;
   act.sa_handler = eggs;
   act.sa_flags = 0;
