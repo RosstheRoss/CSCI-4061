@@ -22,7 +22,7 @@
 
 int port, workers, dispatchers, dynFlag, qLen, cSiz = 0;
 char* path;
-pthread_mutex_t Qlock;
+pthread_mutex_t Qlock, logLock;
 
 /*
   THE CODE STRUCTURE GIVEN BELOW IS JUST A SUGGESTION. FEEL FREE TO MODIFY AS NEEDED
@@ -108,7 +108,7 @@ char* Type(char * mybuf) {
 
 // Function to open and read the file from the disk into the memory
 // Add necessary arguments as needed
-int readFromDisk(/*necessary arguments*/) {
+int readFromDisk() {
     // Open and read the contents of file given the request
     
 }
@@ -128,19 +128,17 @@ void * dispatch(void *arg) {
       // Add the request into the queue
       for(int i = 0; i < qLen; i++) {
         if (traverse == NULL) {
-          //Add things to queue. Lock & unlock to prevent a race condition
+          //Add things to queue. Lock & unlock to prevent a deadlock
           pthread_mutex_lock(&Qlock);
           request_t * tempNode = (request_t*) calloc(1, sizeof(request_t *)); // Yes, he spelled it like that on purpose
-          char* tempBuf = malloc(BUFF_SIZE); // Buffer to store the requested filename 
+          char* tempBuf = (char *) malloc(BUFF_SIZE); // Buffer to store the requested filename 
           pthread_mutex_unlock(&Qlock);
 
-          if (get_request(newReq, tempBuf) != 0) {
+          if (get_request(newReq, tempBuf) != 0)
             continue; // If get_request fails, try again
-          }
-          //Hopefully this works. Please work
+          //Hopefully this works. Please work. Please.
           tempNode->fd = newReq;
-          tempNode->request= tempBuf;
-          free(tempBuf);
+          tempNode->request = tempBuf;
           break;
         } else {
           traverse = traverse -> next;
@@ -155,20 +153,26 @@ void * dispatch(void *arg) {
 
 // Function to retrieve the request from the queue, process it and then return a result to the client
 void * worker(void *arg) {
-
+  long numbytes;
+  unsigned long long numReqs = 0;
    while (1) {
      request_t *head = Q;
      if (head == NULL)
       continue;
      // Get the request from the queue
     pthread_mutex_lock(&Qlock);
-    return_result(head->fd, getContentType(head->request), );
+    char *tempBuf = (char *) calloc(BUFF_SIZE, sizeof(char));
     pthread_mutex_unlock(&Qlock);
      // Get the data from the disk or the cache (extra credit B)
 
      // Log the request into the file and terminal
+     pthread_mutex_lock(&logLock);
+    FILE* log = fopen("../webserver_log", "a");
+    fprintf(log, "[%d][%lld][%d][%s][%s][%s]", +numReqs, pthread_self());
 
+    numb
      // return the result
+    return_result(head->fd, getContentType(head->request), tempBuf, );
   }
   return NULL;
 }
@@ -243,6 +247,7 @@ int main(int argc, char **argv) {
   }
   // Open log file
   FILE* logfile = fopen("webserver_log", "a");
+  fclose("webserver_log");
 
   // Change the current working directory to server root directory
   if (chdir(path) == -1) {
@@ -271,7 +276,9 @@ int main(int argc, char **argv) {
   }
   //Create workers (make detachable?????)
   pthread_t wThreads[workers];
+  int* Wargs = malloc(sizeof(int)*workers);
   for (int i = 0; i < workers; i++) {
+    Wargs[i]=i;
     pthread_create(&wThreads[i], &attr, worker, NULL); //TODO: Worker arguments
   }
   // Create dynamic pool manager thread (extra credit A)
