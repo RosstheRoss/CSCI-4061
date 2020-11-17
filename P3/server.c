@@ -83,7 +83,7 @@ void initCache(){
 
 /* ************************************ Utilities ********************************/
 // Function to get the content type from the request
-char* Type(char * mybuf) {
+char* getContentType(char * mybuf) {
   // Should return the content type based on the file type in the request
   // (See Section 5 in Project description for more details)
   char* ext = strrchr(mybuf, '.');
@@ -108,7 +108,7 @@ char* Type(char * mybuf) {
 
 // Function to open and read the file from the disk into the memory
 // Add necessary arguments as needed
-int readFromDisk() {
+int readFromDisk(const char* fileName) {
     // Open and read the contents of file given the request
     
 }
@@ -153,26 +153,32 @@ void * dispatch(void *arg) {
 
 // Function to retrieve the request from the queue, process it and then return a result to the client
 void * worker(void *arg) {
+  int id = (int) arg;
   long numbytes;
   unsigned long long numReqs = 0;
-   while (1) {
-     request_t *head = Q;
-     if (head == NULL)
-      continue;
+  while (1) {
      // Get the request from the queue
     pthread_mutex_lock(&Qlock);
-    char *tempBuf = (char *) calloc(BUFF_SIZE, sizeof(char));
+    if (Q == NULL)
+      continue;
+    //Make copy of request and get rid of old one.
+    request_t *request = NULL;
+    request->fd = Q->fd;
+    request->request = Q->request;
+    Q = Q->next;
     pthread_mutex_unlock(&Qlock);
      // Get the data from the disk or the cache (extra credit B)
 
      // Log the request into the file and terminal
-     pthread_mutex_lock(&logLock);
+    pthread_mutex_lock(&logLock);
     FILE* log = fopen("../webserver_log", "a");
-    fprintf(log, "[%d][%lld][%d][%s][%s][%s]", +numReqs, pthread_self());
-
-    numb
+    fprintf(log, "[%lld][%ld][%d][%s][%s][%s]", ++numReqs, pthread_self(), request->fd, "Request String", "Bytes/Error", "CACHE");
+    fprintf(stdout, "[%lld][%ld][%d][%s][%s][%s]", ++numReqs, pthread_self(), request->fd, "Request String", "Bytes/Error", "CACHE");
+    fclose(log);
+    pthread_mutex_unlock(&logLock);
      // return the result
-    return_result(head->fd, getContentType(head->request), tempBuf, );
+    char *tempBuf = (char *)calloc(BUFF_SIZE, sizeof(char));
+    return_result(request->fd, getContentType(request->request), tempBuf, );
   }
   return NULL;
 }
@@ -245,9 +251,9 @@ int main(int argc, char **argv) {
         perror("SIGINT Handler Error");
         return -1;
   }
-  // Open log file
-  FILE* logfile = fopen("webserver_log", "a");
-  fclose("webserver_log");
+  // Open log file to make it exist
+  FILE* logfile = fopen("webserver_log", "w");
+  fclose(logfile);
 
   // Change the current working directory to server root directory
   if (chdir(path) == -1) {
@@ -279,8 +285,9 @@ int main(int argc, char **argv) {
   int* Wargs = malloc(sizeof(int)*workers);
   for (int i = 0; i < workers; i++) {
     Wargs[i]=i;
-    pthread_create(&wThreads[i], &attr, worker, NULL); //TODO: Worker arguments
+    pthread_create(&wThreads[i], &attr, worker, (void *) &Wargs[i]); //TODO: Worker arguments
   }
+  free(Wargs);
   // Create dynamic pool manager thread (extra credit A)
   if (dynFlag) {
     pthread_t pThread;
