@@ -108,7 +108,7 @@ char* getContentType(char * mybuf) {
 
 // Function to open and read the file from the disk into the memory
 // Add necessary arguments as needed
-int readFromDisk(const char* fileName) {
+int readFromDisk(const char* fileName, char* buffer) {
     // Open and read the contents of file given the request
     
 }
@@ -136,7 +136,7 @@ void * dispatch(void *arg) {
 
           if (get_request(newReq, dispatchBuf) != 0)
             continue; // If get_request fails, try again
-            
+
           //Hopefully this works. Please work. Please.
           tempNode->fd = newReq;
           tempNode->request = dispatchBuf;
@@ -181,8 +181,12 @@ void * worker(void *arg) {
     char *workerBuf = (char *)calloc(BUFF_SIZE, sizeof(char));
     //TODO! Fix this holy shit 
     // call readFromDisk and read that shit into workerBuf and then call 
-    readFromDisk(... dispatchBuf); 
-    return_result(request->fd, getContentType(request->request), workerBuf, );
+    readFromDisk(... workerBuf); 
+    //use fstat's stat_st to get numbytes?
+    struct stat* oob;
+    fstat(request->fd, &oob);
+    numbytes = oob->st_size;
+    return_result(request->fd, getContentType(request->request), workerBuf, numbytes);
   }
   return NULL;
 }
