@@ -119,7 +119,7 @@ int readFromDisk(const char* fileName, char* buffer) {
 void * dispatch(void *arg) {
 
   while (1) {
-    // Accept client connection
+    // Accept client connection and get the fd
     int newReq = accept_connection();
     if (newReq > INVALID) {
       //Make traversal Queue????
