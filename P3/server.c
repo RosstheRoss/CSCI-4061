@@ -121,7 +121,7 @@ void * dispatch(void *arg) {
   while (1) {
     // Accept client connection
     int newReq = accept_connection();
-    if (newReq >= 0) {
+    if (newReq > INVALID) {
       //Make traversal Queue????
       request_t* traverse = Q;
       // Get request from the client
