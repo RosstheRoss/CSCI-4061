@@ -20,6 +20,9 @@
 #define INVALID -1
 #define BUFF_SIZE 1024
 
+int port, workers, dispatchers, dynFlag, qLen, cSiz = 0;
+char* path;
+
 /*
   THE CODE STRUCTURE GIVEN BELOW IS JUST A SUGGESTION. FEEL FREE TO MODIFY AS NEEDED
 */
@@ -28,8 +31,9 @@
 typedef struct request_queue {
    int fd;
    char *request;
-   request_t next;
+   struct request_queue* next;
 } request_t;
+request_t *Q = NULL; // The request queue
 
 typedef struct cache_entry {
     int len;
@@ -37,7 +41,7 @@ typedef struct cache_entry {
     char *content;
 } cache_entry_t;
 
-request_t queue;
+
 
 /* ******************** Dynamic Pool Code  [Extra Credit A] **********************/
 // Extra Credit: This function implements the policy to change the worker thread pool dynamically
@@ -117,10 +121,26 @@ void * dispatch(void *arg) {
     // Accept client connection
     int newReq = accept_connection();
     if (newReq >= 0) {
+      //Make traversal Queue????
+      request_t* traverse = Q;
       // Get request from the client
-      //get_request(newReq, something);
       // Add the request into the queue
-
+      for(int i = 0; i < qLen; i++) {
+        if (traverse == NULL) {
+          //Add sh!t to queue
+          request_t * tempNode = (request_t*) calloc(1, sizeof(request_t *)); // Yes, he spelled it like that on purpose
+          char* tempBuf = malloc(BUFF_SIZE); // Buffer to store the requested filename 
+          if (get_request(newReq, tempBuf) != 0) {
+            continue; // If get_request fails, try again
+          }
+          //Hopefully this works. Please work
+          tempNode->fd = newReq;
+          tempNode->request= tempBuf;
+          break;
+        } else {
+          traverse = traverse -> next;
+        }
+      }
     }
    }
    return NULL;
@@ -132,14 +152,17 @@ void * dispatch(void *arg) {
 void * worker(void *arg) {
 
    while (1) {
+     request_t *traverse = Q;
+     if (traverse == NULL)
+      continue;
+    
+     // Get the request from the queue
+    
+     // Get the data from the disk or the cache (extra credit B)
 
-    // Get the request from the queue
+     // Log the request into the file and terminal
 
-    // Get the data from the disk or the cache (extra credit B)
-
-    // Log the request into the file and terminal
-
-    // return the result
+     // return the result
   }
   return NULL;
 }
@@ -164,25 +187,25 @@ int main(int argc, char **argv) {
   // Get the input args
 
   //Port
-  int port = atoi(argv[3]);
+  port = atoi(argv[3]);
 
   //Webroot path
-  char* path = argv[4];
+  path = argv[4];
 
   //(static) number of dispatchers
-  int dispatchers = atoi(argv[5]);
+  dispatchers = atoi(argv[5]);
 
   //(static) number of workers
-  int workers = atoi(argv[6]);
+  workers = atoi(argv[6]);
 
   //Dynamic worker flag
-  int dynFlag = atoi(argv[7]);
+  dynFlag = atoi(argv[7]);
 
   //Queue Length
-  int qLen = atoi(argv[8]);
+  qLen = atoi(argv[8]);
 
   //Max cache size
-  int cSiz = atoi(argv[9]);
+  cSiz = atoi(argv[9]);
 
  /* -- ERROR CHECKING -- */
   if (port < 1025 || port > 65535) {
