@@ -131,14 +131,15 @@ void * dispatch(void *arg) {
           //Add things to queue. Lock & unlock to prevent a deadlock
           pthread_mutex_lock(&Qlock);
           request_t * tempNode = (request_t*) calloc(1, sizeof(request_t *)); // Yes, he spelled it like that on purpose
-          char* tempBuf = (char *) malloc(BUFF_SIZE); // Buffer to store the requested filename 
+          char* dispatchBuf = (char *) malloc(BUFF_SIZE); // Buffer to store the requested filename 
           pthread_mutex_unlock(&Qlock);
 
-          if (get_request(newReq, tempBuf) != 0)
+          if (get_request(newReq, dispatchBuf) != 0)
             continue; // If get_request fails, try again
+            
           //Hopefully this works. Please work. Please.
           tempNode->fd = newReq;
-          tempNode->request = tempBuf;
+          tempNode->request = dispatchBuf;
           break;
         } else {
           traverse = traverse -> next;
@@ -177,8 +178,11 @@ void * worker(void *arg) {
     fclose(log);
     pthread_mutex_unlock(&logLock);
      // return the result
-    char *tempBuf = (char *)calloc(BUFF_SIZE, sizeof(char));
-    return_result(request->fd, getContentType(request->request), tempBuf, );
+    char *workerBuf = (char *)calloc(BUFF_SIZE, sizeof(char));
+    //TODO! Fix this holy shit 
+    // call readFromDisk and read that shit into workerBuf and then call 
+    readFromDisk(... dispatchBuf); 
+    return_result(request->fd, getContentType(request->request), workerBuf, );
   }
   return NULL;
 }
