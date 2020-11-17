@@ -28,6 +28,7 @@
 typedef struct request_queue {
    int fd;
    char *request;
+   request_t next;
 } request_t;
 
 typedef struct cache_entry {
@@ -35,6 +36,8 @@ typedef struct cache_entry {
     char *request;
     char *content;
 } cache_entry_t;
+
+request_t queue;
 
 /* ******************** Dynamic Pool Code  [Extra Credit A] **********************/
 // Extra Credit: This function implements the policy to change the worker thread pool dynamically
@@ -258,7 +261,6 @@ int main(int argc, char **argv) {
       printf("SIGINT caught, exiting now.\n");
       // Print the number of pending requests in the request queue
       /*TODO*/
-      //Kill all dispatch and worker threads
       // close log file
       if (fclose(logfile) != 0) {
         perror("fclose error");
