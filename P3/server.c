@@ -20,9 +20,9 @@
 #define INVALID -1
 #define BUFF_SIZE 1024
 
-int port, workers, dispatchers, dynFlag, qLen, cSiz = 0;
+int port, workers, dispatchers, dynFlag, qLen, cSiz, cacheLength = 0;
 char *path;
-pthread_mutex_t Qlock, logLock;
+pthread_mutex_t Qlock, logLock, cacheLock;
 
 /*
   THE CODE STRUCTURE GIVEN BELOW IS JUST A SUGGESTION. FEEL FREE TO MODIFY AS NEEDED
@@ -77,6 +77,7 @@ int isInCache(char *request)
     {
       return index;
     }
+    traverse = traverse->next;
     index++;
   }
   return -1;
@@ -102,28 +103,30 @@ void addIntoCache(char *mybuf, char *memory, int memory_size)
 {
   // It should add the request at an index according to the cache replacement policy
   // Make sure to allocate/free memory when adding or replacing cache entries
+  
   cache_entry_t *traverse = dynQ;
   if (dynQ == NULL)
     return;
-  int cacheIndex = 0;
   bool fullCache = false;
   while (traverse->next != NULL)
   {
-    if (++cacheIndex > cSiz)
+    if (cacheLength > cSiz)
     {
       fullCache = true;
       break;
     }
     traverse = traverse->next;
   }
+  pthread_mutex_lock(&cacheLock);
   if (fullCache)
   {
     cache_entry_t *temp = dynQ;
     dynQ = dynQ->next;
-    free(temp);
     free(temp->content);
     free(temp->request);
-    cacheIndex--;
+    free(temp);
+    cacheLength--;
+    pthread_mutex_unlock(&cacheLock);
     addIntoCache(mybuf, memory, memory_size);
   }
   else
@@ -132,7 +135,16 @@ void addIntoCache(char *mybuf, char *memory, int memory_size)
     temp->request = mybuf;
     temp->content = memory;
     temp->len = memory_size;
-    cacheIndex++;
+    if (cacheLength == 0)
+    {
+      dynQ = temp;
+    }
+    else
+    {
+      traverse->next = temp;
+    }
+    cacheLength++;
+    pthread_mutex_unlock(&cacheLock);
   }
 }
 
@@ -160,7 +172,7 @@ void deleteCache()
 }
 
 // Function to initialize the cache
-int cacheLength;
+
 void initCache()
 {
   // Allocating memory and initializing the cache array
@@ -316,7 +328,7 @@ void *worker(void *arg)
     }
     //Make copy of request and get rid of old one.
     request_t *request = NULL;
-    request = (request_t *)malloc(sizeof(request_t));
+    request = (request_t *) malloc(sizeof(request_t));
     request->fd = Q->fd;
     request->request = Q->request;
     Q = Q->next;
@@ -358,8 +370,10 @@ void *worker(void *arg)
         }
         else
         {
+          char *value = (char *)malloc(numbytes * sizeof(char));
+          strcpy(value, workerBuf)
           //Not in cache, disk read succeeds
-          addIntoCache(request->request, workerBuf, (int)numbytes);
+          addIntoCache(request->request, value, (int)numbytes);
         }
       }
     }
@@ -372,6 +386,7 @@ void *worker(void *arg)
     fclose(log);
     pthread_mutex_unlock(&logLock);
     free(bytesError);
+    free(workerBuf);
 
     // Return the result
     if (fail)
@@ -386,7 +401,6 @@ void *worker(void *arg)
     }
     //Free things no longer needed
     free(request);
-    free(workerBuf);
   }
   return NULL;
 }
