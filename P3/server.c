@@ -188,6 +188,7 @@ void * dispatch(void *arg) {
           } 
           tempNode->fd = newReq;
           tempNode->request = dispatchBuf;
+          tempNode->next = NULL;
           Q = tempNode;
           pthread_mutex_unlock(&Qlock);
           break;
@@ -214,7 +215,6 @@ void * worker(void *arg) {
       pthread_mutex_unlock(&Qlock);
       continue;
     }
-    
     //Make copy of request and get rid of old one.
     request_t *request = NULL;
     request = (request_t*) malloc(sizeof(request_t));
@@ -336,10 +336,13 @@ int main(int argc, char **argv) {
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
   // Start the server
   init(port);
+  char threadName[16];
   // Create dispatcher threads (make detachable????)
   pthread_t dThreads[dispatchers];
   for (int i=0; i<dispatchers; i++) {
     pthread_create(&dThreads[i], &attr, dispatch, NULL); // DEBUG! figure out last arg
+    sprintf(threadName, "Dispatch %d", i);
+    pthread_setname_np(dThreads[i], threadName);
   }
   //Create workers (make detachable?????)
   pthread_t wThreads[workers];
@@ -347,12 +350,15 @@ int main(int argc, char **argv) {
   for (int i = 0; i < workers; i++) {
     Wargs[i]=i;
     pthread_create(&wThreads[i], &attr, worker, (void *) &Wargs[i]); //TODO: Worker arguments
-  }
+    sprintf(threadName, "Worker %d", i);
+    pthread_setname_np(wThreads[i], threadName);
+    }
   free(Wargs);
   // Create dynamic pool manager thread (extra credit A)
   if (dynFlag) {
     pthread_t pThread;
     pthread_create(&pThread, &attr, dynamic_pool_size_update, NULL); //TODO: possible arguments
+    pthread_setname_np(pThread, "Pool Manager");
   }
  
   //Server loop (RUNS FOREVER)
