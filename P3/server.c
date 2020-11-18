@@ -40,9 +40,9 @@ typedef struct cache_entry {
     int len;
     char *request;
     char *content;
+    struct cache_entry* next;
 } cache_entry_t;
-
-
+cache_entry_t *dynQ = NULL; //The cache queue
 
 /* ******************** Dynamic Pool Code  [Extra Credit A] **********************/
 // Extra Credit: This function implements the policy to change the worker thread pool dynamically
@@ -76,6 +76,12 @@ void deleteCache(){
 
 // Function to initialize the cache
 void initCache(){
+  dynQ = (cache_entry_t *)calloc(sizeof(cache_entry_t), cSiz);
+  if (dynQ == NULL)
+  {
+    printf("malloc cannot allocate the initial requested memory.\n");
+    exit(-2);
+  }
   // Allocating memory and initializing the cache array
 }
 
@@ -303,15 +309,8 @@ int main(int argc, char **argv) {
     return -2;
   }
   // Initialize cache (extra credit B)
-  cache_entry_t *dynQ;
-  if (cSiz != 0) {
-    //Should the queue start this large?
-    dynQ =  (cache_entry_t*) calloc(sizeof(cache_entry_t), cSiz);
-    if (dynQ == NULL) {
-      printf("malloc cannot allocate the initial requested memory.\n");
-      exit(-2);
-    }
-  } 
+  initCache();
+
   //Make sure threads are all detached
   pthread_attr_t attr;
   pthread_attr_init(&attr);
