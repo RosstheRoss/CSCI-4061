@@ -178,10 +178,11 @@ void * dispatch(void *arg) {
         if (traverse == NULL) {
           //Add things to queue. Lock & unlock to prevent a deadlock
           pthread_mutex_lock(&Qlock);
-          request_t * tempNode = (request_t*) malloc(sizeof(request_t)); 
+          request_t *tempNode = (request_t *)calloc(1, sizeof(request_t));
           char* dispatchBuf = (char *) malloc(BUFF_SIZE); // Buffer to store the requested filename 
           if (get_request(newReq, dispatchBuf) != 0) {
             pthread_mutex_unlock(&Qlock);
+            free(tempNode);
             free(dispatchBuf);
             continue; // If get_request fails, try again
           } 
@@ -224,7 +225,7 @@ void * worker(void *arg) {
 
     // TODO! Get the data from the disk or the cache (extra credit B)
     numbytes = getFileSize(request->request);
-    char *workerBuf = (char *)calloc(numbytes, sizeof(char));
+    char *workerBuf = (char *) malloc(numbytes*sizeof(char));
     char *bytesError = malloc(BUFF_SIZE); 
     if (numbytes != 0) {
       //SUCC
