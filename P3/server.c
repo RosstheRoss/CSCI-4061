@@ -108,9 +108,15 @@ char* getContentType(char * mybuf) {
 
 // Function to open and read the file from the disk into the memory
 // Add necessary arguments as needed
-int readFromDisk(const char* fileName, char* buffer) {
+int readFromDisk(char* fileName, char* buffer, long fileSize) {
     // Open and read the contents of file given the request
-    
+    FILE* requestFile = fopen(fileName, "r"); 
+    if (requestFile == NULL) {
+      return -1; // Error handle
+    }
+    fgets(buffer, fileSize, requestFile);
+    fclose(requestFile);
+    return 0;
 }
 
 /**********************************************************************************/
@@ -155,7 +161,7 @@ void * dispatch(void *arg) {
 // Function to retrieve the request from the queue, process it and then return a result to the client
 void * worker(void *arg) {
   //TODO: Fix this (gcc does not like this case as void* and int are different sizes)
-  int id = (int) arg;
+  int id = *(int*) arg;
   long numbytes;
   unsigned long long numReqs = 0;
   while (1) {
@@ -174,21 +180,24 @@ void * worker(void *arg) {
      // Log the request into the file and terminal
     pthread_mutex_lock(&logLock);
     FILE* log = fopen("../webserver_log", "a");
-    fprintf(log, "[%lld][%ld][%d][%s][%s][%s]", ++numReqs, pthread_self(), request->fd, "Request String", "Bytes/Error", "CACHE");
-    fprintf(stdout, "[%lld][%ld][%d][%s][%s][%s]", ++numReqs, pthread_self(), request->fd, "Request String", "Bytes/Error", "CACHE");
+    fprintf(log, "[%d][%lld][%d][%s][%s][%s]", id, ++numReqs, request->fd, "Request String", "Bytes/Error", "CACHE");
+    fprintf(stdout, "[%d][%lld][%d][%s][%s][%s]", id, ++numReqs, request->fd, "Request String", "Bytes/Error", "CACHE");
     fclose(log);
     pthread_mutex_unlock(&logLock);
      // return the result
-    char *workerBuf = (char *)calloc(BUFF_SIZE, sizeof(char));
     //TODO! Fix this holy shit 
-    // call readFromDisk and read that shit into workerBuf and then call 
-    readFromDisk(... workerBuf); 
-    //use fstat's stat_st to get numbytes?
-    struct stat* oob;
+    // call readFromDisk and read that shit into workerBuf and then call
+    struct stat *oob = NULL;
     fstat(request->fd, oob);
     numbytes = oob->st_size;
-    //TODO: add return_error as well for when trying to find something that does not exist.
-    return_result(request->fd, getContentType(request->request), workerBuf, numbytes);
+    char *workerBuf = (char *) calloc(numbytes, sizeof(char));
+    if (readFromDisk(request->request, workerBuf, numbytes) != 0) {
+      return_error(request->fd, request->request);
+    } else {
+      //use fstat's stat_st to get numbytes?
+      
+      return_result(request->fd, getContentType(request->request), workerBuf, numbytes);
+    }
   }
   return NULL;
 }
@@ -203,37 +212,35 @@ static void eggs(int signo) {
   exitFlag |= 1;
 }
 int main(int argc, char **argv) {
-
+printf("I AM THE FIRST DEBUGGING STATEMENT\n");
   // Error check on number of arguments
   if(argc != 8){
     printf("usage: %s port path num_dispatcher num_workers dynamic_flag queue_length cache_size\n", argv[0]);
     return -1;
   }
-
   // Get the input args
-
   //Port
-  port = atoi(argv[3]);
-
+  port = atoi(argv[1]);
+  printf("I AM A DEBUGGING STATEMENT 1\n");
   //Webroot path
-  path = argv[4];
-
+  path = argv[2];
+  printf("I AM A DEBUGGING STATEMENT 2\n");
   //(static) number of dispatchers
-  dispatchers = atoi(argv[5]);
-
+  dispatchers = atoi(argv[3]);
+  printf("I AM A DEBUGGING STATEMENT 3\n");
   //(static) number of workers
-  workers = atoi(argv[6]);
-
+  workers = atoi(argv[4]);
+  printf("I AM A DEBUGGING STATEMENT 4\n");
   //Dynamic worker flag
-  dynFlag = atoi(argv[7]);
-
+  dynFlag = atoi(argv[5]);
+  printf("I AM A DEBUGGING STATEMENT 5\n");
   //Queue Length
-  qLen = atoi(argv[8]);
-
+  qLen = atoi(argv[6]);
+  printf("I AM A DEBUGGING STATEMENT 6\n");
   //Max cache size
-  cSiz = atoi(argv[9]);
-
- /* -- ERROR CHECKING -- */
+  cSiz = atoi(argv[7]);
+  printf("I AM A DEBUGGING STATEMENT 7\n");
+  /* -- ERROR CHECKING -- */
   if (port < 1025 || port > 65535) {
     printf("Invalid port. Port must be greater than 1024 or less than 65536.\n");
     return -1;
@@ -253,6 +260,7 @@ int main(int argc, char **argv) {
   /* -- END ERROR CHECKING -- */
 
   // Change SIGINT action for graceful termination
+  printf("I AM A DEBUGGING STATEMENT\n");
   struct sigaction act;
   act.sa_handler = eggs;
   act.sa_flags = 0;
@@ -280,7 +288,7 @@ int main(int argc, char **argv) {
       exit(-2);
     }
   } 
-
+  printf("I AM A DEBUGGING STATEMENT\n");
   //Make sure threads are all detached
   pthread_attr_t attr;
   pthread_attr_init(&attr);
@@ -310,10 +318,10 @@ int main(int argc, char **argv) {
   //Server loop (RUNS FOREVER)
   while (1) {
     //TODO: Add something else?
-
+    int i = 0;
     // Terminate server gracefully
     if (exitFlag){
-      printf("SIGINT caught, exiting now.\n");
+      printf("\nSIGINT caught, exiting now.\n");
       // Print the number of pending requests in the request queue
       /*TODO*/
       // close log file
@@ -322,8 +330,8 @@ int main(int argc, char **argv) {
         return -6;
       }
       // Remove cache (extra credit B)
-      if (cSiz != 0)
-        free(dynQ);
+      //if (cSiz != 0)
+        //free(dynQ);
       printf("Cache has successfully been cleared.\nExiting now.\n");
       return 0;
     }
