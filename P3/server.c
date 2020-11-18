@@ -112,6 +112,8 @@ unsigned long getFileSize(char *file) {
   char* temp = malloc(BUFF_SIZE);
   sprintf(temp, ".%s", file);
   FILE *f = fopen(temp, "r");
+  if (f == NULL)
+    return 0;
   fseek(f, 0, SEEK_END);
   unsigned long len = (unsigned long)ftell(f);
   fclose(f);
@@ -196,22 +198,34 @@ void * worker(void *arg) {
     request->request = Q->request;
     Q = Q->next;
     pthread_mutex_unlock(&Qlock);
+
     // TODO! Get the data from the disk or the cache (extra credit B)
+    numbytes = getFileSize(request->request);
+    char *workerBuf = (char *)calloc(numbytes, sizeof(char));
+    char *bytesError = malloc(BUFF_SIZE); 
+    if (numbytes != 0) {
+      //SUCC
+      sprintf(bytesError, "%ld", numbytes);
+    } else {
+      //ERR
+      sprintf(bytesError, "%s", strerror(errno));
+    }
 
     // Log the request into the file and terminal
     pthread_mutex_lock(&logLock);
     FILE* log = fopen("../webserver_log", "a");
-    fprintf(log, "[%d][%lld][%d][%s][%s][%s]\n", id, ++numReqs, request->fd, request->request, "Bytes/Error", "CACHE");
-    printf("[%d][%lld][%d][%s][%s][%s]\n", id, numReqs, request->fd, request->request, "Bytes/Error", "CACHE");
+    fprintf(log, "[%d][%lld][%d][%s][%s][%s]\n", id, ++numReqs, request->fd, request->request, bytesError, "CACHE");
+    printf("[%d][%lld][%d][%s][%s][%s]\n", id, numReqs, request->fd, request->request, bytesError, "CACHE");
     fclose(log);
     pthread_mutex_unlock(&logLock);
-    
+    free(bytesError);
+
     // Return the result
-    numbytes = getFileSize(request->request);
-    char *workerBuf = (char *) calloc(numbytes, sizeof(char));
     if (readFromDisk(request->request, workerBuf, numbytes) != 0) {
+      //ERR
       return_error(request->fd, request->request);
     } else {
+      //SUCC
       return_result(request->fd, getContentType(request->request), workerBuf, numbytes);
     }
     free(request);
