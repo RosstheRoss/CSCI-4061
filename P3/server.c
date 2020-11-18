@@ -370,10 +370,8 @@ void *worker(void *arg)
         }
         else
         {
-          char *value = (char *)malloc(numbytes * sizeof(char));
-          strcpy(value, workerBuf)
           //Not in cache, disk read succeeds
-          addIntoCache(request->request, value, (int)numbytes);
+          addIntoCache(request->request, workerBuf, (int)numbytes);
         }
       }
     }
@@ -386,7 +384,6 @@ void *worker(void *arg)
     fclose(log);
     pthread_mutex_unlock(&logLock);
     free(bytesError);
-    free(workerBuf);
 
     // Return the result
     if (fail)
