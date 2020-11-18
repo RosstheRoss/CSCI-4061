@@ -83,8 +83,8 @@ void deleteCache(){
   request_t *tempReq = NULL;
   while (Q != NULL) {
     tempReq = Q;
-    free(tempReq->request);
     Q = Q->next;
+    free(tempReq->request);
     free(tempReq);
   }
   // De-allocate/free the cache memory
@@ -170,14 +170,15 @@ void * dispatch(void *arg) {
     // Accept client connection and get the fd
     int newReq = accept_connection();
     if (newReq > INVALID) {
+      pthread_mutex_lock(&Qlock);
       request_t* traverse = Q;
       
       // Get request from the client
       // Add the request into the queue
       for(int i = 0; i < qLen; i++) {
-        if (traverse == NULL) {
+        if (traverse == NULL || traverse->next == NULL) {
           //Add things to queue. Lock & unlock to prevent a deadlock
-          pthread_mutex_lock(&Qlock);
+          
           request_t *tempNode = (request_t *)calloc(1, sizeof(request_t));
           char* dispatchBuf = (char *) malloc(BUFF_SIZE); // Buffer to store the requested filename 
           if (get_request(newReq, dispatchBuf) != 0) {
@@ -189,7 +190,12 @@ void * dispatch(void *arg) {
           tempNode->fd = newReq;
           tempNode->request = dispatchBuf;
           tempNode->next = NULL;
-          Q = tempNode;
+          if (traverse == NULL) {
+            Q = tempNode;
+          } else {
+            traverse->next = tempNode;
+          }
+          
           pthread_mutex_unlock(&Qlock);
           break;
         } else {
