@@ -106,16 +106,33 @@ char* getContentType(char * mybuf) {
   }
 }
 
+// Function to get the size of the file in the queue
+// (Thanks Matt from stackOverflow)
+unsigned long getFileSize(char *file) {
+  char* temp = malloc(BUFF_SIZE);
+  sprintf(temp, ".%s", file);
+  FILE *f = fopen(temp, "r");
+  fseek(f, 0, SEEK_END);
+  unsigned long len = (unsigned long)ftell(f);
+  fclose(f);
+  free(temp);
+  return len;
+}
+
 // Function to open and read the file from the disk into the memory
 // Add necessary arguments as needed
 int readFromDisk(char* fileName, char* buffer, long fileSize) {
+    char* temp = malloc(BUFF_SIZE);
+    sprintf(temp, ".%s", fileName);
     // Open and read the contents of file given the request
-    FILE* requestFile = fopen(fileName, "r"); 
-    if (requestFile == NULL) {
+    int requestFile = open(temp, O_RDONLY); 
+    if (requestFile == -1) {
       return -1; // Error handle
     }
-    fgets(buffer, fileSize, requestFile);
-    fclose(requestFile);
+
+    read(requestFile, buffer, fileSize);
+    close(requestFile);
+    free(temp);
     return 0;
 }
 
@@ -128,24 +145,25 @@ void * dispatch(void *arg) {
     // Accept client connection and get the fd
     int newReq = accept_connection();
     if (newReq > INVALID) {
-      //Make traversal Queue????
       request_t* traverse = Q;
+      
       // Get request from the client
       // Add the request into the queue
       for(int i = 0; i < qLen; i++) {
         if (traverse == NULL) {
+          
           //Add things to queue. Lock & unlock to prevent a deadlock
           pthread_mutex_lock(&Qlock);
-          request_t * tempNode = (request_t*) calloc(1, sizeof(request_t *)); // Yes, he spelled it like that on purpose
+          request_t * tempNode = (request_t*) calloc(1, sizeof(request_t *)); 
           char* dispatchBuf = (char *) malloc(BUFF_SIZE); // Buffer to store the requested filename 
           pthread_mutex_unlock(&Qlock);
 
           if (get_request(newReq, dispatchBuf) != 0)
             continue; // If get_request fails, try again
 
-          //Hopefully this works. Please work. Please.
           tempNode->fd = newReq;
           tempNode->request = dispatchBuf;
+          Q = tempNode;
           break;
         } else {
           traverse = traverse -> next;
@@ -160,44 +178,44 @@ void * dispatch(void *arg) {
 
 // Function to retrieve the request from the queue, process it and then return a result to the client
 void * worker(void *arg) {
-  //TODO: Fix this (gcc does not like this case as void* and int are different sizes)
   int id = *(int*) arg;
-  long numbytes;
+  unsigned long numbytes;
   unsigned long long numReqs = 0;
   while (1) {
-     // Get the request from the queue
+    
+    // Get the request from the queue
     pthread_mutex_lock(&Qlock);
-    if (Q == NULL)
+    if (Q == NULL) {
+      pthread_mutex_unlock(&Qlock);
       continue;
+    }
+    
     //Make copy of request and get rid of old one.
-    request_t *request = NULL;
+    request_t *request = malloc(sizeof(request_t));
     request->fd = Q->fd;
     request->request = Q->request;
     Q = Q->next;
     pthread_mutex_unlock(&Qlock);
-     // Get the data from the disk or the cache (extra credit B)
+    // TODO! Get the data from the disk or the cache (extra credit B)
 
-     // Log the request into the file and terminal
+    // Log the request into the file and terminal
     pthread_mutex_lock(&logLock);
     FILE* log = fopen("../webserver_log", "a");
-    fprintf(log, "[%d][%lld][%d][%s][%s][%s]", id, ++numReqs, request->fd, "Request String", "Bytes/Error", "CACHE");
-    fprintf(stdout, "[%d][%lld][%d][%s][%s][%s]", id, ++numReqs, request->fd, "Request String", "Bytes/Error", "CACHE");
+    fprintf(log, "[%d][%lld][%d][%s][%s][%s]\n", id, ++numReqs, request->fd, request->request, "Bytes/Error", "CACHE");
+    printf("[%d][%lld][%d][%s][%s][%s]\n", id, numReqs, request->fd, request->request, "Bytes/Error", "CACHE");
     fclose(log);
     pthread_mutex_unlock(&logLock);
-     // return the result
-    //TODO! Fix this holy shit 
-    // call readFromDisk and read that shit into workerBuf and then call
-    struct stat *oob = NULL;
-    fstat(request->fd, oob);
-    numbytes = oob->st_size;
+    
+    // Return the result
+    numbytes = getFileSize(request->request);
     char *workerBuf = (char *) calloc(numbytes, sizeof(char));
     if (readFromDisk(request->request, workerBuf, numbytes) != 0) {
       return_error(request->fd, request->request);
     } else {
-      //use fstat's stat_st to get numbytes?
-      
       return_result(request->fd, getContentType(request->request), workerBuf, numbytes);
     }
+    free(request);
+    free(workerBuf);
   }
   return NULL;
 }
@@ -212,7 +230,6 @@ static void eggs(int signo) {
   exitFlag |= 1;
 }
 int main(int argc, char **argv) {
-printf("I AM THE FIRST DEBUGGING STATEMENT\n");
   // Error check on number of arguments
   if(argc != 8){
     printf("usage: %s port path num_dispatcher num_workers dynamic_flag queue_length cache_size\n", argv[0]);
@@ -221,25 +238,19 @@ printf("I AM THE FIRST DEBUGGING STATEMENT\n");
   // Get the input args
   //Port
   port = atoi(argv[1]);
-  printf("I AM A DEBUGGING STATEMENT 1\n");
   //Webroot path
   path = argv[2];
-  printf("I AM A DEBUGGING STATEMENT 2\n");
   //(static) number of dispatchers
   dispatchers = atoi(argv[3]);
-  printf("I AM A DEBUGGING STATEMENT 3\n");
   //(static) number of workers
   workers = atoi(argv[4]);
-  printf("I AM A DEBUGGING STATEMENT 4\n");
   //Dynamic worker flag
   dynFlag = atoi(argv[5]);
-  printf("I AM A DEBUGGING STATEMENT 5\n");
   //Queue Length
   qLen = atoi(argv[6]);
-  printf("I AM A DEBUGGING STATEMENT 6\n");
   //Max cache size
   cSiz = atoi(argv[7]);
-  printf("I AM A DEBUGGING STATEMENT 7\n");
+
   /* -- ERROR CHECKING -- */
   if (port < 1025 || port > 65535) {
     printf("Invalid port. Port must be greater than 1024 or less than 65536.\n");
@@ -260,7 +271,6 @@ printf("I AM THE FIRST DEBUGGING STATEMENT\n");
   /* -- END ERROR CHECKING -- */
 
   // Change SIGINT action for graceful termination
-  printf("I AM A DEBUGGING STATEMENT\n");
   struct sigaction act;
   act.sa_handler = eggs;
   act.sa_flags = 0;
@@ -269,7 +279,7 @@ printf("I AM THE FIRST DEBUGGING STATEMENT\n");
         perror("SIGINT Handler Error");
         return -2;
   }
-  // Open log file to make it exist
+  // Create instance of logfil
   FILE* logfile = fopen("webserver_log", "w");
   fclose(logfile);
 
@@ -288,7 +298,6 @@ printf("I AM THE FIRST DEBUGGING STATEMENT\n");
       exit(-2);
     }
   } 
-  printf("I AM A DEBUGGING STATEMENT\n");
   //Make sure threads are all detached
   pthread_attr_t attr;
   pthread_attr_init(&attr);
@@ -318,21 +327,20 @@ printf("I AM THE FIRST DEBUGGING STATEMENT\n");
   //Server loop (RUNS FOREVER)
   while (1) {
     //TODO: Add something else?
-    int i = 0;
     // Terminate server gracefully
     if (exitFlag){
       printf("\nSIGINT caught, exiting now.\n");
       // Print the number of pending requests in the request queue
-      /*TODO*/
-      // close log file
-      if (fclose(logfile) != 0) {
-        perror("fclose error");
-        return -6;
+      int pendReqs;
+      for (pendReqs = 0; pendReqs < qLen; pendReqs++) {
+        if (Q == NULL || Q->next == NULL)
+          break;
       }
+      printf("There are %d pending requests left in the queue.\n", pendReqs);
       // Remove cache (extra credit B)
       //if (cSiz != 0)
-        //free(dynQ);
-      printf("Cache has successfully been cleared.\nExiting now.\n");
+      //free(dynQ);
+      //printf("Cache has successfully been cleared.\nExiting now.\n");
       return 0;
     }
   }
