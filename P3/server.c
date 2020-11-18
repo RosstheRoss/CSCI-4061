@@ -72,17 +72,18 @@ void addIntoCache(char *mybuf, char *memory , int memory_size){
 // clear the memory allocated to the cache
 void deleteCache(){
   // De-allocate/free the cache memory
+  free(Q);
+  free(dynQ);
 }
 
 // Function to initialize the cache
 void initCache(){
-  dynQ = (cache_entry_t *)calloc(sizeof(cache_entry_t), cSiz);
-  if (dynQ == NULL)
-  {
+  // Allocating memory and initializing the cache array
+  dynQ = (cache_entry_t *) calloc(sizeof(cache_entry_t), cSiz);
+  if (dynQ == NULL) {
     printf("malloc cannot allocate the initial requested memory.\n");
     exit(-2);
   }
-  // Allocating memory and initializing the cache array
 }
 
 /**********************************************************************************/
@@ -190,7 +191,6 @@ void * worker(void *arg) {
   unsigned long numbytes;
   unsigned long long numReqs = 0;
   while (1) {
-    
     // Get the request from the queue
     pthread_mutex_lock(&Qlock);
     if (Q == NULL) {
@@ -234,6 +234,7 @@ void * worker(void *arg) {
       //SUCC
       return_result(request->fd, getContentType(request->request), workerBuf, numbytes);
     }
+    //Free things no longer needed
     free(request);
     free(workerBuf);
   }
@@ -273,19 +274,19 @@ int main(int argc, char **argv) {
 
   /* -- ERROR CHECKING -- */
   if (port < 1025 || port > 65535) {
-    printf("Invalid port. Port must be greater than 1024 or less than 65536.\n");
+    printf("Invalid port. Port must be greater than 1025 or less than 65535 (inclusive).\n");
     return -1;
   }
   if (dispatchers > MAX_THREADS || dispatchers < 1) {
-    printf("Number of dispatchers is invalid. It must be greater than 0 or less than 101.\n");
+    printf("Number of dispatchers is invalid. It must be greater than 1 or less than %d (inclusive).\n", MAX_THREADS);
     return -1;
   }
   if (workers > MAX_THREADS || workers < 1) {
-    printf("Number of dispatchers is invalid. It must be greater than 0 or less than 101.\n");
+    printf("Number of dispatchers is invalid. It must be greater than 1 or less than %d (inclusive).\n", MAX_THREADS);
     return -1;
   }
   if (qLen > MAX_queue_len || qLen < 1) {
-    printf("Queue length is invalid.\n");
+    printf("Queue length is invalid It must be greater than 1 or less than %d (inclusive).\n", MAX_queue_len);
     return -1;
   }
   /* -- END ERROR CHECKING -- */
@@ -351,9 +352,7 @@ int main(int argc, char **argv) {
       }
       printf("There are %d pending requests left in the queue.\n", pendReqs);
       // Remove cache (extra credit B)
-      //if (cSiz != 0)
-      //free(dynQ);
-      //printf("Cache has successfully been cleared.\nExiting now.\n");
+      deleteCache();
       return 0;
     }
   }
