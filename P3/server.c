@@ -83,6 +83,7 @@ void deleteCache(){
   request_t *tempReq = NULL;
   while (Q != NULL) {
     tempReq = Q;
+    free(tempReq->request);
     Q = Q->next;
     free(tempReq);
   }
@@ -135,12 +136,12 @@ unsigned long getFileSize(char *file) {
   char* temp = malloc(BUFF_SIZE);
   sprintf(temp, ".%s", file);
   FILE *f = fopen(temp, "r");
+  free(temp);
   if (f == NULL)
     return 0;
   fseek(f, 0, SEEK_END);
   unsigned long len = (unsigned long)ftell(f);
   fclose(f);
-  free(temp);
   return len;
 }
 
@@ -150,14 +151,13 @@ int readFromDisk(char* fileName, char* buffer, long fileSize) {
     char* temp = malloc(BUFF_SIZE);
     sprintf(temp, ".%s", fileName);
     // Open and read the contents of file given the request
-    int requestFile = open(temp, O_RDONLY); 
+    int requestFile = open(temp, O_RDONLY);
+    free(temp);
     if (requestFile == -1) {
       return -1; // Error handle
     }
-
     read(requestFile, buffer, fileSize);
     close(requestFile);
-    free(temp);
     return 0;
 }
 
@@ -176,19 +176,19 @@ void * dispatch(void *arg) {
       // Add the request into the queue
       for(int i = 0; i < qLen; i++) {
         if (traverse == NULL) {
-          
           //Add things to queue. Lock & unlock to prevent a deadlock
           pthread_mutex_lock(&Qlock);
-          request_t * tempNode = (request_t*) calloc(1, sizeof(request_t)); 
+          request_t * tempNode = (request_t*) malloc(sizeof(request_t)); 
           char* dispatchBuf = (char *) malloc(BUFF_SIZE); // Buffer to store the requested filename 
-          pthread_mutex_unlock(&Qlock);
-
-          if (get_request(newReq, dispatchBuf) != 0)
+          if (get_request(newReq, dispatchBuf) != 0) {
+            pthread_mutex_unlock(&Qlock);
+            free(dispatchBuf);
             continue; // If get_request fails, try again
-
+          } 
           tempNode->fd = newReq;
           tempNode->request = dispatchBuf;
           Q = tempNode;
+          pthread_mutex_unlock(&Qlock);
           break;
         } else {
           traverse = traverse -> next;
@@ -215,7 +215,8 @@ void * worker(void *arg) {
     }
     
     //Make copy of request and get rid of old one.
-    request_t *request = malloc(sizeof(request_t));
+    request_t *request = NULL;
+    request = (request_t*) malloc(sizeof(request_t));
     request->fd = Q->fd;
     request->request = Q->request;
     Q = Q->next;
