@@ -60,7 +60,15 @@ void * dynamic_pool_size_update(void *arg) {
 // Function to check whether the given request is present in cache
 int getCacheIndex(char *request){
   /// return the index if the request is present in the cache
-  return 0;
+  cache_entry_t *traverse = dynQ;
+  int index = 0;
+  while (traverse != NULL) {
+    if (!strcmp(request, traverse->request)) {
+      return index;
+    }
+    index++;
+  }
+  return -1;
 }
 
 // Function to add the request and its file content into the cache
@@ -71,19 +79,27 @@ void addIntoCache(char *mybuf, char *memory , int memory_size){
 
 // clear the memory allocated to the cache
 void deleteCache(){
+  
+  request_t *tempReq = NULL;
+  while (Q != NULL) {
+    tempReq = Q;
+    Q = Q->next;
+    free(tempReq);
+  }
   // De-allocate/free the cache memory
-  free(Q);
-  free(dynQ);
+  cache_entry_t *tempCache = NULL;
+  while (dynQ != NULL)
+  {
+    tempCache = dynQ;
+    dynQ = dynQ->next;
+    free(tempCache);
+  }
 }
 
 // Function to initialize the cache
 void initCache(){
   // Allocating memory and initializing the cache array
-  dynQ = (cache_entry_t *) calloc(sizeof(cache_entry_t), cSiz);
-  if (dynQ == NULL) {
-    printf("malloc cannot allocate the initial requested memory.\n");
-    exit(-2);
-  }
+  
 }
 
 /**********************************************************************************/
@@ -163,7 +179,7 @@ void * dispatch(void *arg) {
           
           //Add things to queue. Lock & unlock to prevent a deadlock
           pthread_mutex_lock(&Qlock);
-          request_t * tempNode = (request_t*) calloc(1, sizeof(request_t *)); 
+          request_t * tempNode = (request_t*) calloc(1, sizeof(request_t)); 
           char* dispatchBuf = (char *) malloc(BUFF_SIZE); // Buffer to store the requested filename 
           pthread_mutex_unlock(&Qlock);
 
@@ -336,7 +352,6 @@ int main(int argc, char **argv) {
     pthread_t pThread;
     pthread_create(&pThread, &attr, dynamic_pool_size_update, NULL); //TODO: possible arguments
   }
-
  
   //Server loop (RUNS FOREVER)
   while (1) {
@@ -353,6 +368,7 @@ int main(int argc, char **argv) {
       printf("There are %d pending requests left in the queue.\n", pendReqs);
       // Remove cache (extra credit B)
       deleteCache();
+      printf("Cache has been deleted.\n");
       return 0;
     }
   }
