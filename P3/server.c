@@ -126,6 +126,7 @@ void addIntoCache(char *mybuf, char *memory, int memory_size)
     free(temp);
     cacheLength--;
     pthread_mutex_unlock(&cacheLock);
+    //TODO: MAKE THIS NOT RUN RECURSIVELY!!!! THIS DOES NOT WORK
     addIntoCache(mybuf, memory, memory_size);
   } else {
     cache_entry_t *temp = calloc(1, sizeof(cache_entry_t));
