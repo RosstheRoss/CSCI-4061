@@ -49,8 +49,7 @@ cache_entry_t *dynQ = NULL; //The cache queue
 /* ******************** Dynamic Pool Code  [Extra Credit A] **********************/
 // Extra Credit: This function implements the policy to change the worker thread pool dynamically
 // depending on the number of requests
-void *dynamic_pool_size_update(void *arg)
-{
+void *dynamic_pool_size_update(void *arg) {
   while (1)
   {
     // Run at regular intervals
@@ -69,38 +68,41 @@ int isInCache(char *request)
   if (dynQ == NULL)
     return -2;
   int index = 0;
+  pthread_mutex_lock(&cacheLock);
   while (traverse != NULL)
   {
     if (traverse->request == NULL)
       break;
     if (!strcmp(request, traverse->request))
     {
+      pthread_mutex_unlock(&cacheLock);
       return index;
     }
     traverse = traverse->next;
     index++;
   }
+  pthread_mutex_unlock(&cacheLock);
   return -1;
 }
 
 // Function to traverse cache queue to find cache
-int readFromCache(int index, char *buffer)
-{
-  // Open and read the contents of file given the request
+int readFromCache(int index, char *buffer) {
   cache_entry_t *traverse = dynQ;
-  for (int i = 0; i < index; i++)
-  {
-    if (traverse == NULL)
+  pthread_mutex_lock(&cacheLock);
+  for (int i = 0; i < index; i++) {
+    if (traverse == NULL) {
+      pthread_mutex_unlock(&cacheLock);
       return -1;
+    }
     traverse = traverse->next;
   }
-  buffer = traverse->content;
+  memcpy(buffer, traverse->content, traverse->len);
+  pthread_mutex_unlock(&cacheLock);
   return 0;
 }
 
 // Function to add the request and its file content into the cache
-void addIntoCache(char *mybuf, char *memory, int memory_size)
-{
+void addIntoCache(char *mybuf, char *memory, int memory_size) {
   // It should add the request at an index according to the cache replacement policy
   // Make sure to allocate/free memory when adding or replacing cache entries
   
@@ -108,10 +110,8 @@ void addIntoCache(char *mybuf, char *memory, int memory_size)
   if (dynQ == NULL)
     return;
   bool fullCache = false;
-  while (traverse->next != NULL)
-  {
-    if (cacheLength > cSiz)
-    {
+  while (traverse->next != NULL) {
+    if (cacheLength > cSiz) {
       fullCache = true;
       break;
     }
@@ -144,8 +144,7 @@ void addIntoCache(char *mybuf, char *memory, int memory_size)
 }
 
 // clear the memory allocated to the cache
-void deleteCache()
-{
+void deleteCache() {
   request_t *tempReq = NULL;
   while (Q != NULL)
   {
@@ -168,24 +167,17 @@ void deleteCache()
 
 // Function to initialize the cache
 
-void initCache()
-{
+void initCache() {
   // Allocating memory and initializing the cache array
   dynQ = calloc(1, sizeof(cache_entry_t));
   cacheLength = 0;
-  // cache_entry_t *tempTrav = dynQ;
-  // for (int i=0; i<cSiz; i++) {
-  //   tempTrav->next = calloc(1, sizeof(cache_entry_t));
-  //   tempTrav = tempTrav->next;
-  // }
 }
 
 /**********************************************************************************/
 
 /* ************************************ Utilities ********************************/
 // Function to get the content type from the request
-char *getContentType(char *mybuf)
-{
+char *getContentType(char *mybuf) {
   // Should return the content type based on the file type in the request
   // (See Section 5 in Project description for more details)
   char *ext = strrchr(mybuf, '.');
@@ -215,7 +207,7 @@ char *getContentType(char *mybuf)
 
 // Function to get the size of the file in the queue
 // (Thanks Matt from stackOverflow)
-unsigned long getFileSize(char *file)
+long getFileSize(char *file)
 {
   char *temp = malloc(BUFF_SIZE);
   sprintf(temp, ".%s", file);
@@ -224,7 +216,7 @@ unsigned long getFileSize(char *file)
   if (f == NULL)
     return 0;
   fseek(f, 0, SEEK_END);
-  unsigned long len = (unsigned long)ftell(f);
+  long len = (long)ftell(f);
   fclose(f);
   return len;
 }
@@ -310,8 +302,8 @@ void *dispatch(void *arg)
 void *worker(void *arg)
 {
   int id = *(int *)arg;
-  unsigned long numbytes;
-  unsigned long long numReqs = 0;
+  long numbytes;
+  unsigned long numReqs = 0;
   while (1)
   {
     // Get the request from the queue
@@ -331,23 +323,19 @@ void *worker(void *arg)
 
     //Get the data from the disk or the cache (extra credit B)
     numbytes = getFileSize(request->request);
-    char *workerBuf = (char *)malloc(numbytes * sizeof(char));
+    char *workerBuf = (char *)calloc(numbytes+1, sizeof(char));
     char *bytesError = malloc(BUFF_SIZE);
     bool fail = false;
-    if (numbytes != 0)
-    {
+    if (numbytes != 0) {
       //SUCC
       sprintf(bytesError, "%ld", numbytes);
-    }
-    else
-    {
+    } else {
       //ERR
       fail = true;
       sprintf(bytesError, "%s", strerror(errno));
     }
     char *cacheTest; //HIT/MISS only
-    if (!fail)
-    {
+    if (!fail) {
       int test = isInCache(request->request);
       if (test != -1)
       {
@@ -366,7 +354,7 @@ void *worker(void *arg)
         else
         {
           //Not in cache, disk read succeeds
-          addIntoCache(request->request, workerBuf, (unsigned int)numbytes);
+          addIntoCache(request->request, workerBuf, numbytes);
         }
       }
     }
@@ -374,8 +362,8 @@ void *worker(void *arg)
     // Log the request into the file and terminal
     pthread_mutex_lock(&logLock);
     FILE *log = fopen("../webserver_log", "a");
-    fprintf(log, "[%d][%lld][%d][%s][%s][%s]\n", id, ++numReqs, request->fd, request->request, bytesError, cacheTest);
-    printf("[%d][%lld][%d][%s][%s][%s]\n", id, numReqs, request->fd, request->request, bytesError, cacheTest);
+    fprintf(log, "[%d][%ld][%d][%s][%s][%s]\n", id, ++numReqs, request->fd, request->request, bytesError, cacheTest);
+    printf("[%d][%ld][%d][%s][%s][%s]\n", id, numReqs, request->fd, request->request, bytesError, cacheTest);
     fclose(log);
     pthread_mutex_unlock(&logLock);
     free(bytesError);
@@ -393,6 +381,7 @@ void *worker(void *arg)
     }
     //Free things no longer needed
     free(request);
+    free(workerBuf);
   }
   return NULL;
 }
