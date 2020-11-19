@@ -20,9 +20,12 @@
 #define INVALID -1
 #define BUFF_SIZE 1024
 
-int port, workers, dispatchers, dynFlag, qLen, cSiz, cacheLength = 0;
+// Global variables
+int port, workers, dispatchers, dynFlag, qLen, cSiz, cacheLength, wIndex = 0;
+pthread_t *wID;
 char *path;
 pthread_mutex_t Qlock, logLock, cacheLock;
+clock_t start_t, end_t, total_t;
 
 /*
   THE CODE STRUCTURE GIVEN BELOW IS JUST A SUGGESTION. FEEL FREE TO MODIFY AS NEEDED
@@ -53,7 +56,28 @@ void *dynamic_pool_size_update(void *arg) {
   while (1)
   {
     // Run at regular intervals
+    usleep(1000000);
     // Increase / decrease dynamically based on your policy
+    // Policy: Have clock tracking how long the whole process takes
+    //         If above maxProcessTime -> spawn X workers
+    //         Else if below mostEfficientTime kill all unnecessary threads leaving 1(or 2) of each
+    if(total_t > 30) {
+      // Threads must be detachable
+      pthread_t wThreads;
+      pthread_attr_t attr;
+      pthread_attr_init(&attr);
+      pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+      
+      // Spawn worker threads
+      pthread_create(&wThreads, &attr, worker, (void *)&wIndex); // Squeaky clean windows!
+      char threadName[16];
+      sprintf(threadName, "Worker %d", wIndex); 
+      pthread_setname_np(wThreads, threadName);
+    }
+    else if (total_t < 6) {
+      // pthread_cancel()
+      // Need dynamically allocated array of thread ID's so we can cancel the necessary threads
+    }
   }
 }
 /**********************************************************************************/
@@ -61,20 +85,17 @@ void *dynamic_pool_size_update(void *arg) {
 /* ************************ Cache Code [Extra Credit B] **************************/
 
 // Function to check whether the given request is present in cache
-int isInCache(char *request)
-{
+int isInCache(char *request) {
   /// return the index if the request is present in the cache
   cache_entry_t *traverse = dynQ;
   if (dynQ == NULL)
     return -2;
   int index = 0;
   pthread_mutex_lock(&cacheLock);
-  while (traverse != NULL)
-  {
+  while (traverse != NULL) {
     if (traverse->request == NULL)
       break;
-    if (!strcmp(request, traverse->request))
-    {
+    if (!strcmp(request, traverse->request)) {
       pthread_mutex_unlock(&cacheLock);
       return index;
     }
@@ -118,6 +139,8 @@ void addIntoCache(char *mybuf, char *memory, int memory_size) {
     traverse = traverse->next;
   }
   pthread_mutex_lock(&cacheLock);
+  char *silence = malloc(memory_size + 1);
+  memcpy(silence, memory, memory_size);
   if (fullCache) {
     cache_entry_t *temp = dynQ;
     dynQ = dynQ->next;
@@ -126,19 +149,18 @@ void addIntoCache(char *mybuf, char *memory, int memory_size) {
     free(temp);
     cacheLength--;
     pthread_mutex_unlock(&cacheLock);
-    //TODO: MAKE THIS NOT RUN RECURSIVELY!!!! THIS DOES NOT WORK
-    addIntoCache(mybuf, memory, memory_size);
+    addIntoCache(mybuf, silence, memory_size);
   } else {
     cache_entry_t *temp = calloc(1, sizeof(cache_entry_t));
     temp->request = mybuf;
-    temp->content = memory;
+    temp->content = silence;
     temp->len = memory_size;
     if (cacheLength == 0) {
       dynQ = temp;
     } else {
       traverse->next = temp;
     }
-    cacheLength++;
+    cacheLength++;;
     pthread_mutex_unlock(&cacheLock);
   }
 }
@@ -162,6 +184,7 @@ void deleteCache() {
     free(tempCache->content);
     free(tempCache->request);
     free(tempCache);
+    free(wID);
   }
 }
 
@@ -336,6 +359,10 @@ void *worker(void *arg)
     }
     char *cacheTest; //HIT/MISS only
     if (!fail) {
+      //Make sure nothing is fiddling with cache before fiddling with cache
+      pthread_mutex_lock(&cacheLock);
+      pthread_mutex_unlock(&cacheLock);
+      
       int test = isInCache(request->request);
       if (test != -1)
       {
@@ -357,6 +384,7 @@ void *worker(void *arg)
           addIntoCache(request->request, workerBuf, numbytes);
         }
       }
+
     }
 
     // Log the request into the file and terminal
@@ -382,6 +410,9 @@ void *worker(void *arg)
     //Free things no longer needed
     free(request);
     free(workerBuf);
+    end_t = clock();
+    total_t = (double)(end_t - start_t) / CLOCKS_PER_SEC;
+    printf("Total time taken by CPU: %ld\n", total_t);
   }
   return NULL;
 }
@@ -391,13 +422,14 @@ void *worker(void *arg)
 //Flag for when server needs to die nicely
 static volatile sig_atomic_t exitFlag = 0;
 
-//Sets exit flag so process can die happily and not sad.
+//Sets e flag so process can die happily and not sad.
 static void eggs(int signo)
 {
   exitFlag |= 1;
 }
 int main(int argc, char **argv)
 {
+  start_t = clock();
   // Error check on number of arguments
   if (argc != 8)
   {
@@ -482,14 +514,15 @@ int main(int argc, char **argv)
     pthread_setname_np(dThreads[i], threadName);
   }
   //Create workers (make detachable?????)
-  pthread_t wThreads[workers];
   int *Wargs = malloc(sizeof(int) * workers);
+  wID = malloc(workers * sizeof(pid_t));
   for (int i = 0; i < workers; i++)
   {
+    wIndex++;
     Wargs[i] = i;
-    pthread_create(&wThreads[i], &attr, worker, (void *)&Wargs[i]); //TODO: Worker arguments
+    pthread_create(wID[i], &attr, worker, (void *)&Wargs[i]); //TODO: Worker arguments
     sprintf(threadName, "Worker %d", i);
-    pthread_setname_np(wThreads[i], threadName);
+    pthread_setname_np(wID[i], threadName);
   }
   free(Wargs);
   // Create dynamic pool manager thread (extra credit A)
