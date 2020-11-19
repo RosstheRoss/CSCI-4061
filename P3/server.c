@@ -118,8 +118,7 @@ void addIntoCache(char *mybuf, char *memory, int memory_size)
     traverse = traverse->next;
   }
   pthread_mutex_lock(&cacheLock);
-  if (fullCache)
-  {
+  if (fullCache) {
     cache_entry_t *temp = dynQ;
     dynQ = dynQ->next;
     free(temp->content);
@@ -128,19 +127,14 @@ void addIntoCache(char *mybuf, char *memory, int memory_size)
     cacheLength--;
     pthread_mutex_unlock(&cacheLock);
     addIntoCache(mybuf, memory, memory_size);
-  }
-  else
-  {
+  } else {
     cache_entry_t *temp = calloc(1, sizeof(cache_entry_t));
     temp->request = mybuf;
     temp->content = memory;
     temp->len = memory_size;
-    if (cacheLength == 0)
-    {
+    if (cacheLength == 0) {
       dynQ = temp;
-    }
-    else
-    {
+    } else {
       traverse->next = temp;
     }
     cacheLength++;
@@ -371,7 +365,7 @@ void *worker(void *arg)
         else
         {
           //Not in cache, disk read succeeds
-          addIntoCache(request->request, workerBuf, (int)numbytes);
+          addIntoCache(request->request, workerBuf, (unsigned int)numbytes);
         }
       }
     }
