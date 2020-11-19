@@ -26,6 +26,7 @@ pthread_t *wID;
 char *path;
 pthread_mutex_t Qlock, logLock, cacheLock;
 clock_t start_t, end_t, total_t;
+void *worker(void *arg);
 
 /*
   THE CODE STRUCTURE GIVEN BELOW IS JUST A SUGGESTION. FEEL FREE TO MODIFY AS NEEDED
@@ -63,20 +64,22 @@ void *dynamic_pool_size_update(void *arg) {
     //         Else if below mostEfficientTime kill all unnecessary threads leaving 1(or 2) of each
     if(total_t > 30) {
       // Threads must be detachable
-      pthread_t wThreads;
+      wID = realloc(wID, (++wIndex) * sizeof(pthread_t));
       pthread_attr_t attr;
       pthread_attr_init(&attr);
       pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
       
       // Spawn worker threads
-      pthread_create(&wThreads, &attr, worker, (void *)&wIndex); // Squeaky clean windows!
+      pthread_create(&wID[wIndex-1], &attr, worker, (void *)&wIndex); // Squeaky clean windows!
       char threadName[16];
       sprintf(threadName, "Worker %d", wIndex); 
-      pthread_setname_np(wThreads, threadName);
+      pthread_setname_np(wID[wIndex-1], threadName);
     }
     else if (total_t < 6) {
-      // pthread_cancel()
+      //TODO: Make sure thread isn't doing anything before killing it
+      pthread_cancel(wID[--wIndex]);
       // Need dynamically allocated array of thread ID's so we can cancel the necessary threads
+      wID = realloc(wID, wIndex * sizeof(pthread_t));
     }
   }
 }
@@ -139,7 +142,7 @@ void addIntoCache(char *mybuf, char *memory, int memory_size) {
     traverse = traverse->next;
   }
   pthread_mutex_lock(&cacheLock);
-  char *silence = malloc(memory_size + 1);
+  char *silence = (char *)malloc(memory_size + 1);
   memcpy(silence, memory, memory_size);
   if (fullCache) {
     cache_entry_t *temp = dynQ;
@@ -151,7 +154,7 @@ void addIntoCache(char *mybuf, char *memory, int memory_size) {
     pthread_mutex_unlock(&cacheLock);
     addIntoCache(mybuf, silence, memory_size);
   } else {
-    cache_entry_t *temp = calloc(1, sizeof(cache_entry_t));
+    cache_entry_t *temp = (cache_entry_t*) calloc(1, sizeof(cache_entry_t));
     temp->request = mybuf;
     temp->content = silence;
     temp->len = memory_size;
@@ -184,15 +187,15 @@ void deleteCache() {
     free(tempCache->content);
     free(tempCache->request);
     free(tempCache);
-    free(wID);
   }
+  free(wID);
 }
 
 // Function to initialize the cache
 
 void initCache() {
   // Allocating memory and initializing the cache array
-  dynQ = calloc(1, sizeof(cache_entry_t));
+  dynQ = (cache_entry_t *)calloc(1, sizeof(cache_entry_t));
   cacheLength = 0;
 }
 
@@ -232,7 +235,7 @@ char *getContentType(char *mybuf) {
 // (Thanks Matt from stackOverflow)
 long getFileSize(char *file)
 {
-  char *temp = malloc(BUFF_SIZE);
+  char *temp = (char *)malloc(BUFF_SIZE);
   sprintf(temp, ".%s", file);
   FILE *f = fopen(temp, "r");
   free(temp);
@@ -248,7 +251,7 @@ long getFileSize(char *file)
 // Add necessary arguments as needed
 int readFromDisk(char *fileName, char *buffer, long fileSize)
 {
-  char *temp = malloc(BUFF_SIZE);
+  char *temp = (char *)malloc(BUFF_SIZE);
   sprintf(temp, ".%s", fileName);
   // Open and read the contents of file given the request
   int requestFile = open(temp, O_RDONLY);
@@ -347,7 +350,7 @@ void *worker(void *arg)
     //Get the data from the disk or the cache (extra credit B)
     numbytes = getFileSize(request->request);
     char *workerBuf = (char *)calloc(numbytes+1, sizeof(char));
-    char *bytesError = malloc(BUFF_SIZE);
+    char *bytesError = (char *)malloc(BUFF_SIZE);
     bool fail = false;
     if (numbytes != 0) {
       //SUCC
@@ -514,13 +517,13 @@ int main(int argc, char **argv)
     pthread_setname_np(dThreads[i], threadName);
   }
   //Create workers (make detachable?????)
-  int *Wargs = malloc(sizeof(int) * workers);
-  wID = malloc(workers * sizeof(pid_t));
+  int *Wargs = (int *) malloc(sizeof(int) * workers);
+  wID = (pthread_t *) malloc(workers * sizeof(pid_t));
   for (int i = 0; i < workers; i++)
   {
     wIndex++;
     Wargs[i] = i;
-    pthread_create(wID[i], &attr, worker, (void *)&Wargs[i]); //TODO: Worker arguments
+    pthread_create(&wID[i], &attr, worker, (void *)&Wargs[i]); //TODO: Worker arguments
     sprintf(threadName, "Worker %d", i);
     pthread_setname_np(wID[i], threadName);
   }
