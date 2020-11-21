@@ -22,6 +22,7 @@
 
 // Global variables
 int port, workers, dispatchers, dynFlag, qLen, cSiz, cacheLength, wIndex = 0;
+int tempNodeCounter = 0, counter2 = 0;
 pthread_t *wID;
 char *path;
 pthread_mutex_t Qlock, logLock, cacheLock;
@@ -150,9 +151,10 @@ void addIntoCache(char *mybuf, char *memory, int memory_size) {
     free(temp->content);
     free(temp->request);
     free(temp);
+    free(silence);
     cacheLength--;
     pthread_mutex_unlock(&cacheLock);
-    addIntoCache(mybuf, silence, memory_size);
+    addIntoCache(mybuf, memory, memory_size);
   } else {
     cache_entry_t *temp = (cache_entry_t*) calloc(1, sizeof(cache_entry_t));
     temp->request = mybuf;
@@ -171,15 +173,19 @@ void addIntoCache(char *mybuf, char *memory, int memory_size) {
 // clear the memory allocated to the cache
 void deleteCache() {
   request_t *tempReq = NULL;
+  pthread_mutex_lock(&Qlock);
   while (Q != NULL)
   {
     tempReq = Q;
     Q = Q->next;
     free(tempReq->request);
     free(tempReq);
+    tempNodeCounter--;
   }
+  pthread_mutex_unlock(&Qlock);
   // De-allocate/free the cache memory
   cache_entry_t *tempCache = NULL;
+  pthread_mutex_lock(&cacheLock);
   while (dynQ != NULL)
   {
     tempCache = dynQ;
@@ -188,6 +194,7 @@ void deleteCache() {
     free(tempCache->request);
     free(tempCache);
   }
+  pthread_mutex_unlock(&cacheLock);
   free(wID);
 }
 
@@ -287,13 +294,15 @@ void *dispatch(void *arg)
         if (traverse == NULL || traverse->next == NULL)
         {
           //Add things to queue. Lock & unlock to prevent a deadlock
-
-          request_t *tempNode = (request_t *)calloc(1, sizeof(request_t));
+          
+          request_t *tempNode = (request_t *)malloc(sizeof(request_t));
+          tempNodeCounter++;
           char *dispatchBuf = (char *)malloc(BUFF_SIZE); // Buffer to store the requested filename
           if (get_request(newReq, dispatchBuf) != 0)
           {
             pthread_mutex_unlock(&Qlock);
             free(tempNode);
+            tempNodeCounter--;
             free(dispatchBuf);
             continue; // If get_request fails, try again
           }
@@ -339,9 +348,9 @@ void *worker(void *arg)
       pthread_mutex_unlock(&Qlock);
       continue;
     }
+    start_t = clock();
     //Make copy of request and get rid of old one.
-    request_t *request = NULL;
-    request = (request_t *) malloc(sizeof(request_t));
+    request_t *request = (request_t *) malloc(sizeof(request_t));
     request->fd = Q->fd;
     request->request = Q->request;
     Q = Q->next;
@@ -415,7 +424,7 @@ void *worker(void *arg)
     free(workerBuf);
     end_t = clock();
     total_t = (double)(end_t - start_t) / CLOCKS_PER_SEC;
-    printf("Total time taken by CPU: %ld\n", total_t);
+    // printf("Total time taken by CPU: %ld\n", total_t);
   }
   return NULL;
 }
@@ -432,7 +441,7 @@ static void eggs(int signo)
 }
 int main(int argc, char **argv)
 {
-  start_t = clock();
+  
   // Error check on number of arguments
   if (argc != 8)
   {
@@ -555,6 +564,7 @@ int main(int argc, char **argv)
       // Remove cache (extra credit B)
       deleteCache();
       printf("Cache has been deleted.\n");
+      printf("%d\n", tempNodeCounter);
       return 0;
     }
   }
