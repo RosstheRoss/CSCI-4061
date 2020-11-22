@@ -26,7 +26,7 @@ int tempNodeCounter = 0, counter2 = 0;
 pthread_t *wID;
 char *path;
 pthread_mutex_t Qlock, logLock, cacheLock;
-clock_t start_t, end_t, total_t;
+clock_t start_t, end_t, total_t = 600;
 void *worker(void *arg);
 
 /*
@@ -64,10 +64,10 @@ void *dynamic_pool_size_update(void *arg)
     // Policy: Have clock tracking how long the whole process takes
     //         If above maxProcessTime -> spawn X workers
     //         Else if below mostEfficientTime kill all unnecessary threads leaving 1(or 2) of each
-    if (total_t > 30)
+    if (total_t > 3000)
     {
       // Threads must be detachable
-      wID = realloc(wID, (++wIndex) * sizeof(pthread_t));
+      wID = (pthread_t *) realloc(wID, (++wIndex * sizeof(pthread_t)));
       pthread_attr_t attr;
       pthread_attr_init(&attr);
       pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
@@ -78,10 +78,10 @@ void *dynamic_pool_size_update(void *arg)
       sprintf(threadName, "Worker %d", wIndex);
       pthread_setname_np(wID[wIndex - 1], threadName);
     }
-    else if (total_t < 6)
+    else if (total_t < 500)
     {
       //TODO: Make sure thread isn't doing anything before killing it
-      pthread_cancel(wID[--wIndex]);
+      pthread_cancel(wID[wIndex--]);
       // Need dynamically allocated array of thread ID's so we can cancel the necessary threads
       wID = realloc(wID, wIndex * sizeof(pthread_t));
     }
@@ -438,7 +438,7 @@ void *worker(void *arg)
     free(request);
     free(workerBuf);
     end_t = clock();
-    total_t = (double)(end_t - start_t) / CLOCKS_PER_SEC;
+    total_t = (double)(end_t - start_t);
     printf("Total time taken by CPU: %ld\n", total_t);
   }
   return NULL;
@@ -506,8 +506,7 @@ int main(int argc, char **argv)
   struct sigaction act;
   act.sa_handler = eggs;
   act.sa_flags = 0;
-  if (sigemptyset(&act.sa_mask) == -1 ||
-      sigaction(SIGINT, &act, NULL) == -1)
+  if (sigemptyset(&act.sa_mask) == -1 || sigaction(SIGINT, &act, NULL) == -1)
   {
     perror("SIGINT Handler Error");
     return -2;
