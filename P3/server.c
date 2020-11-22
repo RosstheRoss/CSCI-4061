@@ -54,7 +54,8 @@ cache_entry_t *dynQ = NULL; //The cache queue
 /* ******************** Dynamic Pool Code  [Extra Credit A] **********************/
 // Extra Credit: This function implements the policy to change the worker thread pool dynamically
 // depending on the number of requests
-void *dynamic_pool_size_update(void *arg) {
+void *dynamic_pool_size_update(void *arg)
+{
   while (1)
   {
     // Run at regular intervals
@@ -63,20 +64,22 @@ void *dynamic_pool_size_update(void *arg) {
     // Policy: Have clock tracking how long the whole process takes
     //         If above maxProcessTime -> spawn X workers
     //         Else if below mostEfficientTime kill all unnecessary threads leaving 1(or 2) of each
-    if(total_t > 30) {
+    if (total_t > 30)
+    {
       // Threads must be detachable
       wID = realloc(wID, (++wIndex) * sizeof(pthread_t));
       pthread_attr_t attr;
       pthread_attr_init(&attr);
       pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-      
+
       // Spawn worker threads
-      pthread_create(&wID[wIndex-1], &attr, worker, (void *)&wIndex); // Squeaky clean windows!
+      pthread_create(&wID[wIndex - 1], &attr, worker, (void *)&wIndex); // Squeaky clean windows!
       char threadName[16];
-      sprintf(threadName, "Worker %d", wIndex); 
-      pthread_setname_np(wID[wIndex-1], threadName);
+      sprintf(threadName, "Worker %d", wIndex);
+      pthread_setname_np(wID[wIndex - 1], threadName);
     }
-    else if (total_t < 6) {
+    else if (total_t < 6)
+    {
       //TODO: Make sure thread isn't doing anything before killing it
       pthread_cancel(wID[--wIndex]);
       // Need dynamically allocated array of thread ID's so we can cancel the necessary threads
@@ -89,63 +92,65 @@ void *dynamic_pool_size_update(void *arg) {
 /* ************************ Cache Code [Extra Credit B] **************************/
 
 // Function to check whether the given request is present in cache
-int isInCache(char *request) {
-  /// return the index if the request is present in the cache
+// return the index if the request is present in the cache
+int isInCache(char *request)
+{
   cache_entry_t *traverse = dynQ;
   if (dynQ == NULL)
     return -2;
   int index = 0;
-  pthread_mutex_lock(&cacheLock);
-  while (traverse != NULL) {
+  while (traverse != NULL)
+  {
     if (traverse->request == NULL)
       break;
-    if (!strcmp(request, traverse->request)) {
-      pthread_mutex_unlock(&cacheLock);
+    if (!strcmp(request, traverse->request))
+    {
       return index;
     }
     traverse = traverse->next;
     index++;
   }
-  pthread_mutex_unlock(&cacheLock);
   return -1;
 }
 
 // Function to traverse cache queue to find cache
-int readFromCache(int index, char *buffer) {
+int readFromCache(int index, char *buffer)
+{
   cache_entry_t *traverse = dynQ;
-  pthread_mutex_lock(&cacheLock);
-  for (int i = 0; i < index; i++) {
-    if (traverse == NULL) {
-      pthread_mutex_unlock(&cacheLock);
+  for (int i = 0; i < index; i++)
+  {
+    if (traverse == NULL)
       return -1;
-    }
     traverse = traverse->next;
   }
   memcpy(buffer, traverse->content, traverse->len);
-  pthread_mutex_unlock(&cacheLock);
   return 0;
 }
 
 // Function to add the request and its file content into the cache
-void addIntoCache(char *mybuf, char *memory, int memory_size) {
+void addIntoCache(char *mybuf, char *memory, int memory_size)
+{
   // It should add the request at an index according to the cache replacement policy
   // Make sure to allocate/free memory when adding or replacing cache entries
-  
+
   cache_entry_t *traverse = dynQ;
   if (dynQ == NULL)
     return;
   bool fullCache = false;
-  while (traverse->next != NULL) {
-    if (cacheLength > cSiz) {
+  while (traverse->next != NULL)
+  {
+    if (cacheLength >= cSiz)
+    {
       fullCache = true;
       break;
     }
     traverse = traverse->next;
   }
-  pthread_mutex_lock(&cacheLock);
   char *silence = (char *)malloc(memory_size + 1);
   memcpy(silence, memory, memory_size);
-  if (fullCache) {
+  if (fullCache)
+  {
+    //Make temp node to delete oldest member of cache
     cache_entry_t *temp = dynQ;
     dynQ = dynQ->next;
     free(temp->content);
@@ -153,25 +158,30 @@ void addIntoCache(char *mybuf, char *memory, int memory_size) {
     free(temp);
     free(silence);
     cacheLength--;
-    pthread_mutex_unlock(&cacheLock);
     addIntoCache(mybuf, memory, memory_size);
-  } else {
-    cache_entry_t *temp = (cache_entry_t*) calloc(1, sizeof(cache_entry_t));
+  }
+  else
+  {
+    cache_entry_t *temp = (cache_entry_t *)calloc(1, sizeof(cache_entry_t));
     temp->request = mybuf;
     temp->content = silence;
     temp->len = memory_size;
-    if (cacheLength == 0) {
+    if (cacheLength == 0)
+    {
       dynQ = temp;
-    } else {
+    }
+    else
+    {
       traverse->next = temp;
     }
-    cacheLength++;;
-    pthread_mutex_unlock(&cacheLock);
+    cacheLength++;
+    ;
   }
 }
 
 // clear the memory allocated to the cache
-void deleteCache() {
+void deleteCache()
+{
   request_t *tempReq = NULL;
   pthread_mutex_lock(&Qlock);
   while (Q != NULL)
@@ -200,9 +210,10 @@ void deleteCache() {
 
 // Function to initialize the cache
 
-void initCache() {
+void initCache()
+{
   // Allocating memory and initializing the cache array
-  dynQ = (cache_entry_t *)calloc(1, sizeof(cache_entry_t));
+  dynQ = (cache_entry_t *)malloc(sizeof(cache_entry_t));
   cacheLength = 0;
 }
 
@@ -210,7 +221,8 @@ void initCache() {
 
 /* ************************************ Utilities ********************************/
 // Function to get the content type from the request
-char *getContentType(char *mybuf) {
+char *getContentType(char *mybuf)
+{
   // Should return the content type based on the file type in the request
   // (See Section 5 in Project description for more details)
   char *ext = strrchr(mybuf, '.');
@@ -258,7 +270,7 @@ long getFileSize(char *file)
 // Add necessary arguments as needed
 int readFromDisk(char *fileName, char *buffer, long fileSize)
 {
-  char *temp = (char *)malloc(BUFF_SIZE);
+  char *temp = (char *)malloc(BUFF_SIZE + 1);
   sprintf(temp, ".%s", fileName);
   // Open and read the contents of file given the request
   int requestFile = open(temp, O_RDONLY);
@@ -289,22 +301,22 @@ void *dispatch(void *arg)
 
       // Get request from the client
       // Add the request into the queue
-      for (int i = 0; i < qLen; i++)
+      for (int i = 0; i < qLen - 1; i++)
       {
+
         if (traverse == NULL || traverse->next == NULL)
         {
           //Add things to queue. Lock & unlock to prevent a deadlock
-          
           request_t *tempNode = (request_t *)malloc(sizeof(request_t));
           tempNodeCounter++;
           char *dispatchBuf = (char *)malloc(BUFF_SIZE); // Buffer to store the requested filename
           if (get_request(newReq, dispatchBuf) != 0)
           {
-            pthread_mutex_unlock(&Qlock);
             free(tempNode);
             tempNodeCounter--;
             free(dispatchBuf);
-            continue; // If get_request fails, try again
+            pthread_mutex_unlock(&Qlock);
+            break; // If get_request fails, ignore the request
           }
           tempNode->fd = newReq;
           tempNode->request = dispatchBuf;
@@ -317,7 +329,6 @@ void *dispatch(void *arg)
           {
             traverse->next = tempNode;
           }
-
           pthread_mutex_unlock(&Qlock);
           break;
         }
@@ -349,8 +360,7 @@ void *worker(void *arg)
       continue;
     }
     start_t = clock();
-    //Make copy of request and get rid of old one.
-    request_t *request = (request_t *) malloc(sizeof(request_t));
+    request_t *request = (request_t *)malloc(sizeof(request_t));
     request->fd = Q->fd;
     request->request = Q->request;
     Q = Q->next;
@@ -358,32 +368,36 @@ void *worker(void *arg)
 
     //Get the data from the disk or the cache (extra credit B)
     numbytes = getFileSize(request->request);
-    char *workerBuf = (char *)calloc(numbytes+1, sizeof(char));
+    char *workerBuf = (char *)calloc(numbytes + 1, sizeof(char));
     char *bytesError = (char *)malloc(BUFF_SIZE);
     bool fail = false;
-    if (numbytes != 0) {
+    if (numbytes != 0)
+    {
       //SUCC
       sprintf(bytesError, "%ld", numbytes);
-    } else {
+    }
+    else
+    {
       //ERR
       fail = true;
       sprintf(bytesError, "%s", strerror(errno));
     }
     char *cacheTest; //HIT/MISS only
-    if (!fail) {
+    if (!fail)
+    {
       //Make sure nothing is fiddling with cache before fiddling with cache
       pthread_mutex_lock(&cacheLock);
-      pthread_mutex_unlock(&cacheLock);
-      
       int test = isInCache(request->request);
       if (test != -1)
       {
         //In cache, file exists
         cacheTest = "HIT";
         readFromCache(test, workerBuf);
+        pthread_mutex_unlock(&cacheLock);
       }
       else
       {
+        pthread_mutex_unlock(&cacheLock);
         cacheTest = "MISS";
         if (readFromDisk(request->request, workerBuf, numbytes) == -1)
         {
@@ -393,10 +407,11 @@ void *worker(void *arg)
         else
         {
           //Not in cache, disk read succeeds
+          pthread_mutex_lock(&cacheLock);
           addIntoCache(request->request, workerBuf, numbytes);
+          pthread_mutex_unlock(&cacheLock);
         }
       }
-
     }
 
     // Log the request into the file and terminal
@@ -424,7 +439,7 @@ void *worker(void *arg)
     free(workerBuf);
     end_t = clock();
     total_t = (double)(end_t - start_t) / CLOCKS_PER_SEC;
-    // printf("Total time taken by CPU: %ld\n", total_t);
+    printf("Total time taken by CPU: %ld\n", total_t);
   }
   return NULL;
 }
@@ -441,7 +456,7 @@ static void eggs(int signo)
 }
 int main(int argc, char **argv)
 {
-  
+
   // Error check on number of arguments
   if (argc != 8)
   {
@@ -526,8 +541,8 @@ int main(int argc, char **argv)
     pthread_setname_np(dThreads[i], threadName);
   }
   //Create workers (make detachable?????)
-  int *Wargs = (int *) malloc(sizeof(int) * workers);
-  wID = (pthread_t *) malloc(workers * sizeof(pid_t));
+  int *Wargs = (int *)malloc(sizeof(int) * workers);
+  wID = (pthread_t *)malloc(workers * sizeof(pid_t));
   for (int i = 0; i < workers; i++)
   {
     wIndex++;
