@@ -141,10 +141,10 @@ void addIntoCache(char *mybuf, char *memory, int memory_size) {
     cache_entry_t *temp = dynQ;
     dynQ = dynQ->next;
     free(temp->content);
-    free(temp->request);
     free(temp);
     free(silence);
-    cacheLength--;
+    // pthread_mutex_lock(&cacheLock);
+    // pthread_mutex_unlock(&cacheLock);
     addIntoCache(mybuf, memory, memory_size);
   } else { //Cache is not full
     cache_entry_t *temp = (cache_entry_t *)calloc(1, sizeof(cache_entry_t));
@@ -194,7 +194,7 @@ void deleteCache()
 
 void initCache(){
   // Allocating memory and initializing the cache array
-  dynQ = (cache_entry_t *)malloc(sizeof(cache_entry_t));
+  dynQ = (cache_entry_t *)calloc(1, sizeof(cache_entry_t));
   wIndex = 0;
   cacheLength = 0;
 }
@@ -387,7 +387,9 @@ void *worker(void *arg) {
       return_result(request->fd, getContentType(request->request), workerBuf, numbytes);
     }
     //Free things no longer needed
+    // free(request->request);
     free(request);
+    tempNodeCounter--;
     free(workerBuf);
     end_t = clock();
     total_t = (double)(end_t - start_t);
@@ -424,9 +426,9 @@ int main(int argc, char **argv) {
   //Dynamic worker flag
   dynFlag = atoi(argv[5]);
   //Queue Length
-  maxQlen = atoi(argv[6]) - 1;
+  maxQlen = atoi(argv[6]);
   //Max cache size
-  maxCSiz = atoi(argv[7]) - 1;
+  maxCSiz = atoi(argv[7]);
 
   /* -- ERROR CHECKING -- */
   if (port < 1025 || port > 65535) {
@@ -483,7 +485,8 @@ int main(int argc, char **argv) {
   }
   //Create workers (make detachable?????)
   int *Wargs = (int *)malloc(sizeof(int) * workers);
-  wID = (pthread_t *)malloc(workers * sizeof(pid_t));
+  pthread_t *throwaway = (pthread_t *)calloc(workers, sizeof(pid_t));
+  wID = throwaway;
   for (int i = 0; i < workers; i++) {
     wIndex++;
     Wargs[i] = i;
