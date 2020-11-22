@@ -26,7 +26,7 @@ int tempNodeCounter = 0, counter2 = 0;
 pthread_t *wID;
 char *path;
 pthread_mutex_t Qlock, logLock, cacheLock;
-pthread_cond_t QisFull;
+pthread_cond_t QisEmpty, QisFull, cacheIsEmpty;
 clock_t start_t, end_t, total_t = 600;
 void *worker(void *arg);
 
@@ -120,10 +120,10 @@ int isInCache(char *request)
 int readFromCache(int index, char *buffer)
 {
   cache_entry_t *traverse = dynQ;
+  if (traverse == NULL)
+    return -1;
   for (int i = 0; i < index; i++)
   {
-    if (traverse == NULL)
-      return -1;
     traverse = traverse->next;
   }
   memcpy(buffer, traverse->content, traverse->len);
@@ -172,6 +172,7 @@ void addIntoCache(char *mybuf, char *memory, int memory_size)
     if (cacheLength == 0)
     {
       dynQ = temp;
+      pthread_cond_signal(&cacheIsEmpty);
     }
     else
     {
@@ -216,7 +217,7 @@ void deleteCache()
 void initCache()
 {
   // Allocating memory and initializing the cache array
-  // dynQ = (cache_entry_t *)malloc(sizeof(cache_entry_t));
+  dynQ = (cache_entry_t *)malloc(sizeof(cache_entry_t));
   wIndex = 0;
   cacheLength = 0;
 }
@@ -301,6 +302,8 @@ void *dispatch(void *arg)
     if (newReq > INVALID)
     {
       pthread_mutex_lock(&Qlock);
+      while (curQSiz == maxQlen)
+        pthread_cond_wait(&QisFull, &Qlock);
       request_t *traverse = Q;
 
 
@@ -328,11 +331,13 @@ void *dispatch(void *arg)
           if (traverse == NULL)
           {
             Q = tempNode;
+            pthread_cond_signal(&QisEmpty);
           }
           else
           {
             traverse->next = tempNode;
           }
+          curQSiz++;
           pthread_mutex_unlock(&Qlock);
           break;
         }
@@ -358,16 +363,20 @@ void *worker(void *arg)
   {
     // Get the request from the queue
     pthread_mutex_lock(&Qlock);
-    if (Q == NULL)
-    {
-      pthread_mutex_unlock(&Qlock);
-      continue;
-    }
+    while (curQSiz == 0)
+      pthrad_cond_wait(&QisEmpty, &Qlock);
+    // if (Q == NULL)
+    // {
+    //   pthread_mutex_unlock(&Qlock);
+    //   continue;
+    // }
     start_t = clock();
     request_t *request = (request_t *)malloc(sizeof(request_t));
     request->fd = Q->fd;
     request->request = Q->request;
     Q = Q->next;
+    curQSiz--;
+    pthread_cond_signal(&QisFull);
     pthread_mutex_unlock(&Qlock);
 
     //Get the data from the disk or the cache (extra credit B)
