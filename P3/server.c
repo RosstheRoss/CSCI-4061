@@ -21,11 +21,12 @@
 #define BUFF_SIZE 1024
 
 // Global variables
-int port, workers, dispatchers, dynFlag, qLen, cSiz, cacheLength, wIndex = 0;
+int port, workers, dispatchers, dynFlag, maxQlen, maxCSiz, curQSiz, cacheLength, wIndex;
 int tempNodeCounter = 0, counter2 = 0;
 pthread_t *wID;
 char *path;
 pthread_mutex_t Qlock, logLock, cacheLock;
+pthread_cond_t QisFull;
 clock_t start_t, end_t, total_t = 600;
 void *worker(void *arg);
 
@@ -67,7 +68,7 @@ void *dynamic_pool_size_update(void *arg)
     if (total_t > 3000)
     {
       // Threads must be detachable
-      wID = (pthread_t *) realloc(wID, (++wIndex * sizeof(pthread_t)));
+      pthread_t * newwID = (pthread_t *) realloc(wID, (++wIndex * sizeof(pthread_t)));
       pthread_attr_t attr;
       pthread_attr_init(&attr);
       pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
@@ -77,13 +78,15 @@ void *dynamic_pool_size_update(void *arg)
       char threadName[16];
       sprintf(threadName, "Worker %d", wIndex);
       pthread_setname_np(wID[wIndex - 1], threadName);
+      printf("Created a new thread\n");
     }
     else if (total_t < 500)
     {
       //TODO: Make sure thread isn't doing anything before killing it
       pthread_cancel(wID[wIndex--]);
       // Need dynamically allocated array of thread ID's so we can cancel the necessary threads
-      wID = realloc(wID, wIndex * sizeof(pthread_t));
+      pthread_t* newwID = realloc(wID, wIndex * sizeof(pthread_t));
+      printf("Deleting a thread\n");
     }
   }
 }
@@ -139,7 +142,7 @@ void addIntoCache(char *mybuf, char *memory, int memory_size)
   bool fullCache = false;
   while (traverse->next != NULL)
   {
-    if (cacheLength >= cSiz)
+    if (cacheLength >= maxCSiz)
     {
       fullCache = true;
       break;
@@ -213,7 +216,8 @@ void deleteCache()
 void initCache()
 {
   // Allocating memory and initializing the cache array
-  dynQ = (cache_entry_t *)malloc(sizeof(cache_entry_t));
+  // dynQ = (cache_entry_t *)malloc(sizeof(cache_entry_t));
+  wIndex = 0;
   cacheLength = 0;
 }
 
@@ -299,9 +303,9 @@ void *dispatch(void *arg)
       pthread_mutex_lock(&Qlock);
       request_t *traverse = Q;
 
-      // Get request from the client
-      // Add the request into the queue
-      for (int i = 0; i < qLen - 1; i++)
+
+      int i;
+      for (i = 0; i < maxQlen - 1; i++)
       {
 
         if (traverse == NULL || traverse->next == NULL)
@@ -475,9 +479,9 @@ int main(int argc, char **argv)
   //Dynamic worker flag
   dynFlag = atoi(argv[5]);
   //Queue Length
-  qLen = atoi(argv[6]);
+  maxQlen = atoi(argv[6]);
   //Max cache size
-  cSiz = atoi(argv[7]);
+  maxCSiz = atoi(argv[7]);
 
   /* -- ERROR CHECKING -- */
   if (port < 1025 || port > 65535)
@@ -495,7 +499,7 @@ int main(int argc, char **argv)
     printf("Number of dispatchers is invalid. It must be greater than 1 or less than %d (inclusive).\n", MAX_THREADS);
     return -1;
   }
-  if (qLen > MAX_queue_len || qLen < 1)
+  if (maxQlen > MAX_queue_len || maxQlen < 1)
   {
     printf("Queue length is invalid It must be greater than 1 or less than %d (inclusive).\n", MAX_queue_len);
     return -1;
@@ -569,7 +573,7 @@ int main(int argc, char **argv)
       printf("\nSIGINT caught, exiting now.\n");
       // Print the number of pending requests in the request queue
       int pendReqs;
-      for (pendReqs = 0; pendReqs < qLen; pendReqs++)
+      for (pendReqs = 0; pendReqs < maxQlen; pendReqs++)
       {
         if (Q == NULL || Q->next == NULL)
           break;
