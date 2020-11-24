@@ -76,10 +76,9 @@ void *dynamic_pool_size_update(void *arg) {
         wIndex++;
         Wargs[i] = i;
         pthread_create(&wID[i], &attr, worker, (void *)&Wargs[i]); //TODO: Worker arguments
-        char* threadName = calloc(16,sizeof(char));
+        char threadName[16];
         sprintf(threadName, "Worker %d", i);
         pthread_setname_np(wID[i], threadName);
-        free(threadName);
       }
     }
     free(Wargs);
