@@ -54,34 +54,38 @@ cache_entry_t *dynQ = NULL; //The cache queue
 // Extra Credit: This function implements the policy to change the worker thread pool dynamically
 // depending on the number of requests
 void *dynamic_pool_size_update(void *arg) {
+    pthread_attr_t attr;
+  pthread_attr_init(&attr);
+  pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
   while (1) {
-    // Run at regular intervals
-    usleep(1000000);
-    // Increase / decrease dynamically based on your policy
-    // Policy: Have clock tracking how long the whole process takes
-    //         If above maxProcessTime -> spawn X workers
-    //         Else if below mostEfficientTime kill all unnecessary threads leaving 1(or 2) of each
-    if (total_t > 3000) {
-      // Threads must be detachable
-      pthread_t * newwID = (pthread_t *) realloc(wID, (++wIndex * sizeof(pthread_t)));
-      pthread_attr_t attr;
-      pthread_attr_init(&attr);
-      pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+    // # of active worker thrids / curQSiz = the server load
+    // If the server load is over 90% usage, spawn MAX_THREADS - # of active worker thrids (wIndex?). This will create the max number of threads possible.
+    // If server load is between 10% and 90%, spawn (50 threads - # of active workers) 
+    // If server load is below 10%, kill all but 2 thrids
+    if (curQSiz == 0)
+      continue;
+    float serverLoad = 100*((float) curQSiz / (float)wIndex);
+    int actualLoad = serverLoad;
+    printf("\n\nCurrent # of worker thrids: %d\n", wIndex);
+    printf("Current Q size: %d\n", curQSiz);
+    printf("Server load: %d\n\n", actualLoad);
+    int *Wargs = (int *)malloc(sizeof(int) * MAX_THREADS);
+    if (actualLoad > 50) {
+      wID = (pthread_t *) realloc(wID, MAX_THREADS);
+      for (int i = wIndex; i < MAX_THREADS; i++) {
+        wIndex++;
+        Wargs[i] = i;
+        pthread_create(&wID[i], &attr, worker, (void *)&Wargs[i]); //TODO: Worker arguments
+        char* threadName = calloc(16,sizeof(char));
+        sprintf(threadName, "Worker %d", i);
+        pthread_setname_np(wID[i], threadName);
+        free(threadName);
+      }
+    }
+    free(Wargs);
 
-      // Spawn worker threads
-      pthread_create(&wID[wIndex - 1], &attr, worker, (void *)&wIndex); // Squeaky clean windows!
-      char threadName[16];
-      sprintf(threadName, "Worker %d", wIndex);
-      pthread_setname_np(wID[wIndex - 1], threadName);
-      printf("Created a new thread\n");
-    }
-    else if (total_t < 500) {
-      //TODO: Make sure thread isn't doing anything before killing it
-      pthread_cancel(wID[wIndex--]);
-      // Need dynamically allocated array of thread ID's so we can cancel the necessary threads
-      pthread_t* newwID = realloc(wID, wIndex * sizeof(pthread_t));
-      printf("Deleting a thread\n");
-    }
+    //This doesn't work ._.
+    
   }
 }
 /**********************************************************************************/
@@ -159,7 +163,6 @@ void addIntoCache(char *mybuf, char *memory, int memory_size) {
       traverse->next = temp;
     }
     cacheLength++;
-    ;
   }
 }
 
@@ -272,7 +275,7 @@ void *dispatch(void *arg){
       for (int i = 0; i < maxQlen; i++) {
         if (traverse == NULL || traverse->next == NULL) {
           //Add things to queue. Lock & unlock to prevent a deadlock
-          request_t *tempNode = (request_t *)malloc(sizeof(request_t));
+          request_t *tempNode = (request_t *)malloc(sizeof(request_t) + 1);
           tempNodeCounter++;
           char *dispatchBuf = (char *)malloc(BUFF_SIZE); // Buffer to store the requested filename
           if (get_request(newReq, dispatchBuf) != 0) {
