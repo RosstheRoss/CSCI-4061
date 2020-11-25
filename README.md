@@ -22,6 +22,7 @@ Monitors the queue, retrieve new requests as they come in, and send the result b
 ## Extra Credit A
 
 ```dynamic_pool_size_update():```
+Changes the worker thread pool dynamically depending on the number of requests 
 
 ## Extra Credit B
 
