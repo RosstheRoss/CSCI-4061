@@ -9,7 +9,7 @@
         "type": "cppdbg",
         "request": "launch",
         "program": "${workspaceFolder}/web_server",
-        "args": ["9000", "testing", "100", "1", "1", "100", "100"],
+        "args": ["9000", "testing", "100", "100", "0", "100", "100"],
         "stopAtEntry": false,
         
         "cwd": "${workspaceFolder}",
