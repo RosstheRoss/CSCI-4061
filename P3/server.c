@@ -460,7 +460,7 @@ int main(int argc, char **argv) {
     return -2;
   }
   // Create instance of logfil
-  FILE *logfile = fopen("webserver_log", "w");
+  FILE *logfile = fopen("webserver_log", "w")
   fclose(logfile);
 
   // Change the current working directory to server root directory
