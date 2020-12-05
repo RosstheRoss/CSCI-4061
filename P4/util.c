@@ -16,7 +16,7 @@
 #include "util.h"
 
 //Global socket for all things
-int socket;
+int sock;
 
 /**********************************************
  * init
@@ -29,17 +29,23 @@ int socket;
    - if init encounters any errors, it will call exit().
 ************************************************/
 void init(int port) {
+  if ((sock = socket(PF_INET, SOCK_STREAM, 0)) == -1) {
+    perror("Cannot create socket");
+    exit(EXIT_FAILURE);
+  }
+  //Socket describer
   struct sockaddr_in addr;
   addr.sin_family = AF_INET;
   addr.sin_addr.s_addr = htonl(INADDR_ANY);
   addr.sin_port = htons(port);
   //Allow port to be released
   int enable = 1;
-  if (setsockopt(socket, SOL_SOCKET, SO_REUSEADDR, (char *)&enable, sizeof(int)) == -1) {
+  if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char *)&enable, sizeof(int)) == -1) {
     perror("Cannot set socket option");
     exit(EXIT_FAILURE);
   }
-  if (bind(socket, (struct sockaddr*) &addr, sizeof(addr)) == -1) {
+  //Bind socket and open the port
+  if (bind(sock, (struct sockaddr*) &addr, sizeof(addr)) == -1) {
     perror("Cannot bind socket");
     exit(EXIT_FAILURE);
   }
