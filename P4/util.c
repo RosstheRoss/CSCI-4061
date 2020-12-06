@@ -71,7 +71,8 @@ int accept_connection(void) {
   if ((new_socket = accept(sockfd, (struct sockaddr *)&address, (socklen_t*)&addrlen))<0) {
     perror("Accept");
     return -1;
-  };
+  }
+  printf("%d\n", new_socket);
   return(new_socket);
 
 }
@@ -92,6 +93,7 @@ int accept_connection(void) {
      specific 'connection'.
 ************************************************/
 int get_request(int fd, char *filename) {
+  printf("%d\n", fd);
 
   char buffer[2048] = "\0";
   char get[100], http[100];
@@ -99,7 +101,6 @@ int get_request(int fd, char *filename) {
   read(fd, buffer, 2048);
   printf("%s\n", buffer);
   if(sscanf(buffer, "%s %s %s", get, filename, http) < 2) { // Read HTTP Get request and parse 
-    perror("Cannot parse request");
     return -1;    
   }
   else if (strcmp(get, "GET")) {
@@ -140,6 +141,7 @@ int get_request(int fd, char *filename) {
 ************************************************/
 int return_result(int fd, char *content_type, char *buf, int numbytes) {
   //Convert low IO to high IO
+  printf("%d\n", fd);
   FILE *fdstream = fdopen(fd, "w");
   if (fdstream == NULL) {
     printf("File stream conversion(?) failed.\n");
@@ -179,6 +181,7 @@ int return_result(int fd, char *content_type, char *buf, int numbytes) {
    - returns 0 on success, nonzero on failure.
 ************************************************/
 int return_error(int fd, char *buf) {
+  printf("%d\n", fd);
   //Convert low IO to high IO
   FILE *fdstream = fdopen(fd, "w");
   if (fdstream == NULL) {
