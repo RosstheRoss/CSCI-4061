@@ -16,7 +16,7 @@
 #include "util.h"
 
 //Global socket
-int sockfd, new_socket;
+int sockfd;
 
 /**********************************************
  * init
@@ -67,11 +67,11 @@ void init(int port) {
 int accept_connection(void) {
 
   struct sockaddr_in address;
-  int addrlen = sizeof(address);
+  int addrlen = sizeof(address), new_socket = 0;
   if ((new_socket = accept(sockfd, (struct sockaddr *)&address, (socklen_t*)&addrlen))<0) {
     perror("Accept");
     return -1;
-  }
+  };
   return(new_socket);
 
 }
@@ -97,22 +97,22 @@ int get_request(int fd, char *filename) {
   char get[100], http[100];
 
   read(fd, buffer, 2048);
-   
+  printf("%s\n", buffer);
   if(sscanf(buffer, "%s %s %s", get, filename, http) < 2) { // Read HTTP Get request and parse 
-    close(fd);
+    perror("Cannot parse request");
     return -1;    
   }
   else if (strcmp(get, "GET")) {
-    close(fd);
+    printf("Not a GET\n");
     return -2;
   }
   else if (strlen(filename) > 1023) {
-    close(fd);
+    printf("Not sure but bad\n");
     return -3;
   }
   for (int i=0; i<strlen(filename); i++) {
     if ((strstr(filename, "//")) != 0 || (strstr(filename, "..")) != 0) {
-      close(fd);
+      printf("Invalid directory!\n");
       return -4;
     }
   }
@@ -146,7 +146,6 @@ int return_result(int fd, char *content_type, char *buf, int numbytes) {
     close(fd);
     return -1;
   }
-  //
   if (fprintf(fdstream, "HTTP/1.1 200 OK\nContent-Type: %s\nContent-Length: %d\nConnection: Close\n\n", content_type, numbytes) < 0) {
     close(fd);
     return -2;
@@ -162,7 +161,7 @@ int return_result(int fd, char *content_type, char *buf, int numbytes) {
     return -4;
   }
   if (write(fd, buf, numbytes) == -1) {
-    perror("Return result: Write error");
+    perror("Write error");
     close(fd);
     return -5;
   }
@@ -182,32 +181,27 @@ int return_result(int fd, char *content_type, char *buf, int numbytes) {
 int return_error(int fd, char *buf) {
   //Convert low IO to high IO
   FILE *fdstream = fdopen(fd, "w");
-  if (fdstream == NULL)
-  {
+  if (fdstream == NULL) {
     printf("File stream conversion(?) failed.\n");
     close(fd);
     return -1;
   }
   //
-  if (fprintf(fdstream, "HTTP/1.1 404 Not Found\nContent-Length: %ld\nConnection: Close\n\n", strlen(buf)) < 0)
-  {
+  if (fprintf(fdstream, "HTTP/1.1 404 Not Found\nContent-Length: %ld\nConnection: Close\n\n", strlen(buf)) < 0) {
     close(fd);
     return -2;
   }
-  if (fflush(fdstream) == EOF)
-  {
+  if (fflush(fdstream) == EOF) {
     perror("Flush error");
     close(fd);
     return -3;
   }
-  if (fclose(fdstream) == EOF)
-  {
+  if (fclose(fdstream) == EOF) {
     perror("Stream close error");
     close(fd);
     return -4;
   }
-  if (write(fd, buf, strlen(buf)) == -1)
-  {
+  if (write(fd, buf, strlen(buf)) == -1) {
     perror("Return result: Write error");
     close(fd);
     return -5;
