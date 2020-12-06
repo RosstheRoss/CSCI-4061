@@ -15,8 +15,8 @@
 #include <unistd.h>
 #include "util.h"
 
-//Global socket for all things
-int sock;
+//Global socket
+int sockfd, new_socket;
 
 /**********************************************
  * init
@@ -29,24 +29,30 @@ int sock;
    - if init encounters any errors, it will call exit().
 ************************************************/
 void init(int port) {
-  if ((sock = socket(PF_INET, SOCK_STREAM, 0)) == -1) {
+  if ((sockfd = socket(PF_INET, SOCK_STREAM, 0)) == -1) {
     perror("Cannot create socket");
     exit(EXIT_FAILURE);
   }
   //Socket describer
   struct sockaddr_in addr;
+  memset(&addr, 0, sizeof(addr));
   addr.sin_family = AF_INET;
   addr.sin_addr.s_addr = htonl(INADDR_ANY);
   addr.sin_port = htons(port);
   //Allow port to be released
   int enable = 1;
-  if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char *)&enable, sizeof(int)) == -1) {
+  if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (char *)&enable, sizeof(int)) == -1) {
     perror("Cannot set socket option");
     exit(EXIT_FAILURE);
   }
   //Bind socket and open the port
-  if (bind(sock, (struct sockaddr*) &addr, sizeof(addr)) == -1) {
+  if (bind(sockfd, (struct sockaddr*) &addr, sizeof(addr)) == -1) {
     perror("Cannot bind socket");
+    exit(EXIT_FAILURE);
+  }
+  //Enable listen
+  if (listen(sockfd, 20) == -1) {
+    perror("Cannot set listen queue");
     exit(EXIT_FAILURE);
   }
 }
@@ -59,6 +65,15 @@ void init(int port) {
    - if the return value is negative, the request should be ignored.
 ***********************************************/
 int accept_connection(void) {
+
+  struct sockaddr_in address;
+  int addrlen = sizeof(address);
+  if ((new_socket = accept(sockfd, (struct sockaddr *)&address, (socklen_t*)&addrlen))<0) {
+    perror("Accept");
+    return -1;
+  }
+  return(new_socket);
+
 }
 
 /**********************************************
@@ -77,6 +92,31 @@ int accept_connection(void) {
      specific 'connection'.
 ************************************************/
 int get_request(int fd, char *filename) {
+
+  char buffer[2048] = "\0";
+  char get[100], http[100];
+
+  read(fd, buffer, 2048);
+   
+  if(sscanf(buffer, "%s %s %s", get, filename, http) < 2) { // Read HTTP Get request and parse 
+    close(fd);
+    return -1;    
+  }
+  else if (strcmp(get, "GET")) {
+    close(fd);
+    return -2;
+  }
+  else if (strlen(filename) > 1023) {
+    close(fd);
+    return -3;
+  }
+  for (int i=0; i<strlen(filename); i++) {
+    if ((strstr(filename, "//")) != 0 || (strstr(filename, "..")) != 0) {
+      close(fd);
+      return -4;
+    }
+  }
+  return 0;
 }
 
 /**********************************************
@@ -99,6 +139,35 @@ int get_request(int fd, char *filename) {
    - returns 0 on success, nonzero on failure.
 ************************************************/
 int return_result(int fd, char *content_type, char *buf, int numbytes) {
+  //Convert low IO to high IO
+  FILE *fdstream = fdopen(fd, "w");
+  if (fdstream == NULL) {
+    printf("File stream conversion(?) failed.\n");
+    close(fd);
+    return -1;
+  }
+  //
+  if (fprintf(fdstream, "HTTP/1.1 200 OK\nContent-Type: %s\nContent-Length: %d\nConnection: Close\n\n", content_type, numbytes) < 0) {
+    close(fd);
+    return -2;
+  }
+  if (fflush(fdstream) == EOF) {
+    perror("Flush error");
+    close(fd);
+    return -3;
+  } 
+  if (fclose(fdstream) == EOF) {
+    perror("Stream close error");
+    close(fd);
+    return -4;
+  }
+  if (write(fd, buf, numbytes) == -1) {
+    perror("Return result: Write error");
+    close(fd);
+    return -5;
+  }
+  close(fd);
+  return 0;
 }
 
 /**********************************************
@@ -111,4 +180,38 @@ int return_result(int fd, char *content_type, char *buf, int numbytes) {
    - returns 0 on success, nonzero on failure.
 ************************************************/
 int return_error(int fd, char *buf) {
+  //Convert low IO to high IO
+  FILE *fdstream = fdopen(fd, "w");
+  if (fdstream == NULL)
+  {
+    printf("File stream conversion(?) failed.\n");
+    close(fd);
+    return -1;
+  }
+  //
+  if (fprintf(fdstream, "HTTP/1.1 404 Not Found\nContent-Length: %ld\nConnection: Close\n\n", strlen(buf)) < 0)
+  {
+    close(fd);
+    return -2;
+  }
+  if (fflush(fdstream) == EOF)
+  {
+    perror("Flush error");
+    close(fd);
+    return -3;
+  }
+  if (fclose(fdstream) == EOF)
+  {
+    perror("Stream close error");
+    close(fd);
+    return -4;
+  }
+  if (write(fd, buf, strlen(buf)) == -1)
+  {
+    perror("Return result: Write error");
+    close(fd);
+    return -5;
+  }
+  close(fd);
+  return 0;
 }
