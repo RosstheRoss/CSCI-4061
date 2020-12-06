@@ -100,19 +100,23 @@ int get_request(int fd, char *filename) {
 
   read(fd, buffer, 2048);
   printf("%s\n", buffer);
-  if(sscanf(buffer, "%s %s %s", get, filename, http) < 2) { // Read HTTP Get request and parse 
+  if(sscanf(buffer, "%s %s %s", get, filename, http) < 2) { // Read HTTP Get request and parse
+    close(fd); 
     return -1;    
   }
   else if (strcmp(get, "GET")) {
+    close(fd);
     printf("Not a GET\n");
     return -2;
   }
   else if (strlen(filename) > 1023) {
+    close(fd);
     printf("Not sure but bad\n");
     return -3;
   }
   for (int i=0; i<strlen(filename); i++) {
     if ((strstr(filename, "//")) != 0 || (strstr(filename, "..")) != 0) {
+      close(fd);
       printf("Invalid directory!\n");
       return -4;
     }
@@ -163,7 +167,7 @@ int return_result(int fd, char *content_type, char *buf, int numbytes) {
     return -4;
   }
   if (write(fd, buf, numbytes) == -1) {
-    perror("Write error");
+    perror("Bad write");
     close(fd);
     return -5;
   }
