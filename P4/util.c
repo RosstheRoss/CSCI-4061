@@ -17,6 +17,7 @@
 
 //Global socket
 int sockfd;
+//Make sure one connection is dealt with at a time
 pthread_mutex_t connection = PTHREAD_MUTEX_INITIALIZER;
 
 /**********************************************
@@ -179,7 +180,7 @@ int return_result(int fd, char *content_type, char *buf, int numbytes) {
    - returns 0 on success, nonzero on failure.
 ************************************************/
 int return_error(int fd, char *buf) {
-  //Convert low IO to high IO
+  //Convert low IO to high IO to be able to fprintf
   FILE *fdstream = fdopen(fd, "w");
   if (fdstream == NULL) {
     printf("File stream conversion(?) failed.\n");
