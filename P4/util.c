@@ -17,6 +17,7 @@
 
 //Global socket
 int sockfd;
+pthread_mutex_t connection = PTHREAD_MUTEX_INITIALIZER;
 
 /**********************************************
  * init
@@ -65,14 +66,15 @@ void init(int port) {
    - if the return value is negative, the request should be ignored.
 ***********************************************/
 int accept_connection(void) {
-
+  pthread_mutex_lock(&connection);
   struct sockaddr_in address;
   int addrlen = sizeof(address), new_socket = 0;
   if ((new_socket = accept(sockfd, (struct sockaddr *)&address, (socklen_t*)&addrlen))<0) {
     perror("Accept");
+    pthread_mutex_unlock(&connection);
     return -1;
   }
-  printf("%d\n", new_socket);
+  pthread_mutex_unlock(&connection);
   return(new_socket);
 
 }
