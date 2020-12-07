@@ -29,7 +29,7 @@ int sockfd;
    - if init encounters any errors, it will call exit().
 ************************************************/
 void init(int port) {
-  if ((sockfd = socket(PF_INET, SOCK_STREAM, 0)) == -1) {
+  if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
     perror("Cannot create socket");
     exit(EXIT_FAILURE);
   }
@@ -93,13 +93,11 @@ int accept_connection(void) {
      specific 'connection'.
 ************************************************/
 int get_request(int fd, char *filename) {
-  printf("%d\n", fd);
 
   char buffer[2048] = "\0";
   char get[100], http[100];
 
-  read(fd, buffer, 2048);
-  printf("%s\n", buffer);
+  recv(fd, buffer, 2048, 0);
   if(sscanf(buffer, "%s %s %s", get, filename, http) < 2) { // Read HTTP Get request and parse
     close(fd); 
     return -1;    
@@ -145,7 +143,6 @@ int get_request(int fd, char *filename) {
 ************************************************/
 int return_result(int fd, char *content_type, char *buf, int numbytes) {
   //Convert low IO to high IO
-  printf("%d\n", fd);
   FILE *fdstream = fdopen(fd, "w");
   if (fdstream == NULL) {
     printf("File stream conversion(?) failed.\n");
@@ -161,13 +158,8 @@ int return_result(int fd, char *content_type, char *buf, int numbytes) {
     close(fd);
     return -3;
   } 
-  if (fclose(fdstream) == EOF) {
-    perror("Stream close error");
-    close(fd);
-    return -4;
-  }
-  if (write(fd, buf, numbytes) == -1) {
-    perror("Bad write");
+  if (send(fd, buf, numbytes, 0) == -1) {
+    perror("Bad send");
     close(fd);
     return -5;
   }
@@ -185,7 +177,6 @@ int return_result(int fd, char *content_type, char *buf, int numbytes) {
    - returns 0 on success, nonzero on failure.
 ************************************************/
 int return_error(int fd, char *buf) {
-  printf("%d\n", fd);
   //Convert low IO to high IO
   FILE *fdstream = fdopen(fd, "w");
   if (fdstream == NULL) {
@@ -203,13 +194,8 @@ int return_error(int fd, char *buf) {
     close(fd);
     return -3;
   }
-  if (fclose(fdstream) == EOF) {
-    perror("Stream close error");
-    close(fd);
-    return -4;
-  }
-  if (write(fd, buf, strlen(buf)) == -1) {
-    perror("Return result: Write error");
+  if (send(fd, buf, strlen(buf), 0) == -1) {
+    perror("Send error");
     close(fd);
     return -5;
   }
