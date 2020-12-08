@@ -67,15 +67,24 @@ void init(int port) {
    - if the return value is negative, the request should be ignored.
 ***********************************************/
 int accept_connection(void) {
-  pthread_mutex_lock(&connection);
+  if (pthread_mutex_lock(&connection) != 0) {
+    perror("Cannot aquire lock");
+    return -3;
+  }
   struct sockaddr_in address;
   int addrlen = sizeof(address), new_socket = 0;
   if ((new_socket = accept(sockfd, (struct sockaddr *)&address, (socklen_t*)&addrlen))<0) {
-    perror("Accept");
-    pthread_mutex_unlock(&connection);
+    perror("Accept error");
+    if (pthread_mutex_unlock(&connection) != 0) {
+      perror("Cannot unlock");
+      return -2;
+    }
     return -1;
   }
-  pthread_mutex_unlock(&connection);
+  if (pthread_mutex_unlock(&connection) != 0) {
+    perror("Cannot unlock");
+    return -2;
+  }
   return(new_socket);
 
 }
