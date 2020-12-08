@@ -102,22 +102,34 @@ int get_request(int fd, char *filename) {
 
   recv(fd, buffer, 2048, 0);
   if(sscanf(buffer, "%s %s %s", get, filename, http) < 2) { // Read HTTP Get request and parse
-    close(fd); 
+    if (close(fd) == -1) {
+      perror("Socket close error");
+      return -15;
+    } 
     return -1;    
   }
   else if (strcmp(get, "GET")) {
-    close(fd);
+    if (close(fd) == -1) {
+      perror("Socket close error");
+      return -15;
+    }
     printf("Not a GET\n");
     return -2;
   }
   else if (strlen(filename) > 1023) {
-    close(fd);
+    if (close(fd) == -1) {
+      perror("Socket close error");
+      return -15;
+    }
     printf("Not sure but bad\n");
     return -3;
   }
   for (int i=0; i<strlen(filename); i++) {
     if ((strstr(filename, "//")) != 0 || (strstr(filename, "..")) != 0) {
-      close(fd);
+      if (close(fd) == -1) {
+        perror("Socket close error");
+        return -15;
+      }
       printf("Invalid directory!\n");
       return -4;
     }
@@ -149,24 +161,39 @@ int return_result(int fd, char *content_type, char *buf, int numbytes) {
   FILE *fdstream = fdopen(fd, "w");
   if (fdstream == NULL) {
     printf("File stream conversion(?) failed.\n");
-    close(fd);
+    if (close(fd) == -1) {
+      perror("Socket close error");
+      return -15;
+    }
     return -1;
   }
   if (fprintf(fdstream, "HTTP/1.1 200 OK\nContent-Type: %s\nContent-Length: %d\nConnection: Close\n\n", content_type, numbytes) < 0) {
-    close(fd);
+    if (close(fd) == -1) {
+      perror("Socket close error");
+      return -15;
+    }
     return -2;
   }
   if (fflush(fdstream) == EOF) {
     perror("Flush error");
-    close(fd);
+    if (close(fd) == -1) {
+      perror("Socket close error");
+      return -15;
+    }
     return -3;
   } 
   if (send(fd, buf, numbytes, 0) == -1) {
     perror("Bad send");
-    close(fd);
+    if (close(fd) == -1) {
+      perror("Socket close error");
+      return -15;
+    }
     return -5;
   }
-  close(fd);
+  if (close(fd) == -1) {
+    perror("Socket close error");
+    return -15;
+  }
   return 0;
 }
 
@@ -184,24 +211,39 @@ int return_error(int fd, char *buf) {
   FILE *fdstream = fdopen(fd, "w");
   if (fdstream == NULL) {
     printf("File stream conversion(?) failed.\n");
-    close(fd);
+    if (close(fd) == -1) {
+      perror("Socket close error");
+      return -15;
+    }
     return -1;
   }
   //
   if (fprintf(fdstream, "HTTP/1.1 404 Not Found\nContent-Length: %ld\nConnection: Close\n\n", strlen(buf)) < 0) {
-    close(fd);
+    if (close(fd) == -1) {
+      perror("Socket close error");
+      return -15;
+    }
     return -2;
   }
   if (fflush(fdstream) == EOF) {
     perror("Flush error");
-    close(fd);
+    if (close(fd) == -1) {
+      perror("Socket close error");
+      return -15;
+    }
     return -3;
   }
   if (send(fd, buf, strlen(buf), 0) == -1) {
     perror("Send error");
-    close(fd);
+    if (close(fd) == -1) {
+      perror("Socket close error");
+      return -15;
+    }
     return -5;
   }
-  close(fd);
+  if (close(fd) == -1) {
+    perror("Socket close error");
+    return -15;
+  }
   return 0;
 }
