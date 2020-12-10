@@ -110,6 +110,7 @@ int get_request(int fd, char *filename) {
   char get[100], http[100];
 
   recv(fd, buffer, 2048, 0);
+  //--ERROR HANDLING--
   if(sscanf(buffer, "%s %s %s", get, filename, http) < 2) { // Read HTTP Get request and parse
     if (close(fd) == -1) {
       perror("Socket close error");
@@ -117,7 +118,9 @@ int get_request(int fd, char *filename) {
     } 
     return -1;    
   }
-  else if (strcmp(get, "GET")) {
+  //Print header
+  printf("%s %s %s\n", get, filename, http);
+  if (strcmp(get, "GET")) {
     if (close(fd) == -1) {
       perror("Socket close error");
       return -15;
@@ -125,7 +128,7 @@ int get_request(int fd, char *filename) {
     printf("Not a GET\n");
     return -2;
   }
-  else if (strlen(filename) > 1023) {
+  if (strlen(filename) > 1023) {
     if (close(fd) == -1) {
       perror("Socket close error");
       return -15;
@@ -133,6 +136,7 @@ int get_request(int fd, char *filename) {
     printf("Not sure but bad\n");
     return -3;
   }
+  //--END ERROR HANDLING--
   for (int i=0; i<strlen(filename); i++) {
     if ((strstr(filename, "//")) != 0 || (strstr(filename, "..")) != 0) {
       if (close(fd) == -1) {
