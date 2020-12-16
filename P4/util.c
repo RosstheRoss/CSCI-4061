@@ -118,8 +118,7 @@ int get_request(int fd, char *filename) {
     } 
     return -1;    
   }
-  //Print header
-  printf("%s %s %s\n", get, filename, http);
+
   if (strcmp(get, "GET")) {
     if (close(fd) == -1) {
       perror("Socket close error");
@@ -133,7 +132,7 @@ int get_request(int fd, char *filename) {
       perror("Socket close error");
       return -15;
     }
-    printf("Not sure but bad\n");
+    printf("Filename too long\n");
     return -3;
   }
   //--END ERROR HANDLING--
@@ -143,7 +142,7 @@ int get_request(int fd, char *filename) {
         perror("Socket close error");
         return -15;
       }
-      printf("Invalid directory!\n");
+      printf("Invalid directory format\n");
       return -4;
     }
   }
